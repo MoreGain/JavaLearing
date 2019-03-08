@@ -939,10 +939,387 @@ h5新增: date number tel email...
 - UUID
 
   > 生成随机不重复的32位字符串，Java 代码生成后为36位
+  >
+  > 实际开发中 UUID 使用较多，很少使用自增长
 
   ```java
   String uuid = UUID.randomUUID().toString();		
   ```
 
+
+- 注册成功后的操作
+
+  > 重定向到登陆页面
+  >
+  > 不建议使用转发：1.转发地址栏不改变	2.转发后若执行刷新会再次回到注册页面
+
+##### 登录信息的回显
+
+- 将表单提交的数据获得，到数据库进行查找返回 User 对象，根据对象是否为空判断是否存在此用户
+- 登录成功，则**重定向**到网站首页
+- 登陆失败，**转发**到登录页面并进行错误信息的回显，使用 request 域存储错误信息
+- 向 Jsp 页面写入错误信息，<%= java-coding%>，域对象中无内容则不显示(显示为 null 的问题)
+
+### Cookie & Session
+
+##### 会话技术简介
+
+> 会话技术是用来帮助服务器记住客户端状态的。
+>
+> 从打开浏览器访问某个站点，到关闭整个浏览器的过程称为一次会话。
+>
+> Session 将信息存到服务器，安全性较好，但增加了服务器的压力。
+>
+> Cookie 将信息存到客户端，减少了服务器的压力，安全性不好，客户端可以清除 Cookie
+
+##### Cookie
+
+- API
+
+  - 设置 cookie 的持久化时间
+
+    > cookie.setMaxAge(int seconds);	//cookie 中会产生一个 expires 值代表失效时间
+
+    ​    不设置持久化时间，cookie 会存储在浏览器的内存中，浏览器关闭 cookie 的信息被销毁（会话级别的 cookie ），设置持久化时间，cookie 会被持久化到浏览器的磁盘文件中
+
+  - 设置 cookie 的携带路径
+
+    > cookie.setPath();	//cookie 中产生一个 path 值表示携带路径
+
+    ```java
+    cookie.setPath("/");	//访问此服务器下的所有资源都带着这个cookie
+    ```
+
+    ​    不设置携带路径，cookie 信息会在访问产生该 cookie 的 web 资源所在的路径都携带 cookie 信息。（该资源的外部地址）
+
+  - 删除 cookie
+
+    > 使用同名同路径的持久化时间为0的 cookie 进行覆盖即可。
+
+    ```java
+    //新建一个cookie
+    Cookie c = new Cookie("key","");
+    //设置其 path 为与要删除的cookie path 一致
+    c.setPath(String path);
+    //设置持久化时间为0
+    c.setMaxAge(0);    
+    ```
+
+    
+
+- 服务器发送 Cookie 到客户端
+
+  ```java
+  //1.创建Cookie对象
+  Cookie cookie = new Cookie("","");	//不能传入中文
+  //2.发送cookie(以头形式传输	set-cookie: key=vlaue)
+  response.addCookie(cookie);
+  ```
+
   
 
+- 服务器从客户端获取 Cookie
+
+  ```java
+  //获得所有Cookie
+  Cookie[] cookies = request.getCookies();
+  //获得cookie名字
+  String name = cookie.getName();
+  //获得cookie值
+  String value = cookie.getValue();
+  ```
+
+- 显示网站上次访问时间
+
+##### Session
+
+​	Session 技术是基于 cookie 的，cookie 会存储 session 编号 JSESSIONID。发送 session 编号和根据编号寻找 session 值是客户端与服务器自动完成的，无需编码。
+
+- 创建一个 session 区域
+
+  ```java
+  //此方法底层会自动判断当前客户端是否已经存在session，若不存在会自动创建一个session，若存在则返回已存在的session
+  HttpSession session = request.getSession();
+  String id = session.getId();	//返回session的JSESSIONID
+  ```
+
+  
+
+- 向 session 存取数据(session 是一个域对象，作用范围为一次会话)
+
+  > setAttribute(String key, Object value);
+  >
+  > getAttribute(String key);
+  >
+  > removeAttribute(String key);
+
+- session 的生命周期
+
+  > 创建：第一次执行 getSession() 时创建
+  >
+  > 销毁：1. 服务器（非正常）关闭	2. session 默认30分钟过期	3. 手动销毁
+
+  - session 过期
+
+    ```xml
+    <!-- 可在web.xml中配置session的过期时间，tomcat全局配置中默认30分钟 -->
+    <session-config>
+        <session-timeout>20</session-timeout>
+    </session-config>
+    ```
+
+    > session 过期时间计算起点：从不操作服务器端资源开始
+
+  - 手动销毁
+
+    > session.invalidate();
+
+  - 浏览器关闭，seesion 就销毁了吗？
+
+  - session 的持久化
+
+    > 将存储JSESSIONID的cookie持久化即可
+
+- 验证码校验功能实现
+
+  > 获得输入的验证码
+  >
+  > 获得随机生成的验证码，通过存入 session 域
+  >
+  > 比较
+
+### JSP
+
+##### JSP 脚本和注释
+
+- 脚本
+
+  > <%	%>	//此脚本中的代码会被加载到 service 方法中
+  >
+  > <=%	%>	//此脚本中的代码加载到 out.print() 中
+  >
+  > <!%	%>	//此脚本中的代码属于全局代码，可写属性和方法	
+
+- 注释
+
+  > html 注释	<!-- -->	//可见范围 jsp/servlet/html
+  >
+  > Java 注释	//可见范围 jsp/servlet
+  >
+  > Jsp 注释	<%-- --%>	//可见范围 jsp
+
+##### Jsp 运行原理
+
+​	Jsp 在访问时会被 Web 容器翻译为 Servlet 再执行，被翻译后后的 Servlet 存放在 tomcat 的 work 目录下。
+
+​	过程：访问---->\*.jsp---->\*_jsp.java(servlet)---->编译执行【此过程由 JspServlet 执行，全局 web.xml 已配置】
+
+##### Jsp 指令
+
+- page(实际开发中很少用)
+
+  > <%@ page attribute1=value1 attribute2=value2 ... %>
+  >
+  > language	contextType	pageEncoding(内部包含contextType)	session(true)
+  >
+  > extends	import	errorPage(内部发生错误的跳转页面，404等错误无法跳转)	isErrorPage
+  >
+  > 404错误：可在 web.xml 中配置全局错误页面
+  >
+  > <error-page>
+  >
+  > ​	<error-code>404</error-code>
+  >
+  > ​	<location>/error.jsp</location>
+  >
+  > </errorPage>
+  >
+  > buffer(默认8kb， out 的缓冲区大小)
+
+- include
+
+  > 页面包含指令（静态包含），将一个 Jsp 页面包含到另一个 Jsp 页面
+  >
+  > <%@ include file="" %>
+
+- taglib 指令
+
+  > 在 Jsp 页面引入第三方标签库( jstl 标签库、struts2 标签库)
+  >
+  > <%@ taglib uri="" prefix="" %>
+
+- Jsp 内置对象
+
+  - pageContext(PageContext)
+
+    > 当前页面的上下文对象，不同于 page 对象
+
+    - pageContext 域对象(增添的方法)
+
+      作用范围：当前 Jsp 页面
+
+      > //使用 pageContext 可以操作其他域对象	
+      >
+      > //scope 可为: PageContext.REQUEST_SCOPE(SESSION_SCOPE/APPLICATION_SCOPE)
+      >
+      > setAttribute(String key, Object obj, int scope)
+      >
+      > getAttribute(String key, int scope)
+      >
+      > removeAttribute(String key, int scope)
+      >
+      > findAttribute(String key)	//按照域的作用范围大小依次搜索需要的值
+
+    - 获得其他八大对象
+
+      > pageContext.getRequest()
+      >
+      > pageContext.getSessiom()
+
+  - session(HttpSession)
+
+  - application(ServletContext)
+
+  - config(ServletConfig)
+
+  - out(JspWriter)
+
+    > 向客户端输出内容	out.writer()
+    >
+    > 输出的内容先写入 out 缓冲区，在刷入 response 缓冲区，数据会显示在 response 缓冲区已有内容之后，response.getWriter().write() 方式写入的数据直接写入 response 缓冲区，可通过设置 page 的 buffer 值为0，让 out 对象的输出内容直接写入 response 缓冲区。
+
+  - page(this)
+
+  - request(HttpRequest)
+
+  - response(HttpResponse)
+
+  - exception(isErrorPage)
+
+- Jsp 标签
+
+  - 页面包含(动态包含)
+
+    ```jsp
+    <jsp:include page="" ></jsp:include>
+    ```
+
+    > 静态包含：将两个页面翻译到一个 Servlet
+    >
+    > 动态包含：翻译为两个 Servlet 页面，包含页面中使用 include 方法(执行到此方法才编译第二个 Jsp 页面)加载另一个页面
+
+  - 请求转发
+
+    ```jsp
+    <jsp:forward page="" ></jsp:forward>
+    ```
+
+- 显示商品列表
+
+### EL/JSTL
+
+##### EL 表达式
+
+> 可以嵌套在 jsp 页面内部，用于取出域对象中的数据
+
+```jsp
+//jsp脚本与El表达式对比
+<%=request.getAttribute("name")%>
+${requestScope.name}
+
+//取字符串
+${requestScope.name}
+//取对象
+${sessionScope.user.name}
+//取容器
+${applicationScope.list[0].name}
+
+//全域查找
+${key}
+```
+
+- El 的内置对象
+
+  - pageScope, requestScope, sessionScope, applicationScope	//域对象
+
+  - param, paramValues    //request.getParameter(), request.getParameterValues()
+
+    > 用于在 jsp 页面中获得请求中的数据，在 Servlet 中开发基本不用
+
+  - header, headerValues    //request.getHeader()
+
+  - initParam    //全局初始化参数
+
+  - cookie
+
+  - pageContext
+
+    > //获得 request 对象
+    >
+    > ${pageContext.request }
+    >
+    > //可用于获得web应用项目名称
+    >
+    > ${pageContext.request.contextPath }
+    >
+    > <%=pageContext.getRequest().getContextPath()%>	//此句不能执行，获得的不是HttpRequest
+
+- EL 执行表达式
+
+  > ${1+1 }
+  >
+  > ${1==1?true:false }
+  >
+  > ${empty user }	//判断一个值是否为空
+
+##### JSTL
+
+> Jsp 标准标签库，简化 Jsp 脚本，需导入 jstl 与 standard jar 包
+>
+> 它具有五个字库：Core(c)(常用), I18N(fmt), SQL(sql), XML(x), Functions(fn)
+
+```jsp
+<%@ taglib url="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+```
+
+- 常用标签
+
+  - \<c:if>
+
+    ```jsp
+    <c:if test="${1==1 }">
+    </c:if>
+    <c:if test={1!=1 }>
+    </c:if>
+    ```
+
+  - \<c:foreach>
+
+    ```jsp
+    //具有两种方式
+    <c:foreach begin="0" end="5" var="i">
+    </c:foreach>
+    
+    <c:foreach item="集合或数组" var="集合中某一个元素">
+    </c:foreach>
+    ```
+
+##### JavaEE 开发模式
+
+- Web 开发模式----MVC
+
+  > M: Model	模型: JavaBean----封装数据
+  >
+  > V: View	视图: Jsp----页面显示
+  >
+  > C: Controller	控制器: Servlet----获取数据封装并传递，并指定显示的页面
+
+- JavaEE开发模式----三层架构
+
+  实际开发时，通过包的结构体现三层结构。
+
+  > Web 层: 与客户端进行交互
+  >
+  > Service 层: 复杂业务处理
+  >
+  > Dao 层: 与数据库进行交互 
