@@ -561,13 +561,13 @@ h5新增: date number tel email...
 
 ##### Web 应用目录结构
 
-![](C:\Users\admin\Desktop\笔记\webapp structure.jpg)
+![](C:\Users\admin\Desktop\笔记\image\webapp structure.jpg)
 
 ##### Eclipse 下配置 tomcat
 
 - 项目发布常见问题
-  1. 在 Eclipse 中更改了项目名称后无法访问到项目
-  2. 在 tomcat webapps 目录结构中是删除项目后无法再部署此项目
+  1. 在 Eclipse 中更改了项目名称后无法访问到项目(web project setting)
+  2. 在 tomcat webapps 目录结构中删除项目后无法再部署此项目
 
 ##### Intellij 下配置 tomcat
 
@@ -1323,3 +1323,307 @@ ${key}
   > Service 层: 复杂业务处理
   >
   > Dao 层: 与数据库进行交互 
+
+### 事务
+
+> 一个事务具有 n 个单元，它们要么同时执行成功，或同时执行失败。
+
+##### MySql 事务
+
+> MySql 自动开启事务，默认一条 SQL 语句为一条事务
+
+手动开启事务
+
+> 显示开启一个事务	start transaction；
+>
+> 提交事务(不提交则默认回滚)	commit;
+>
+> 事务回滚	rollback;
+
+##### JDBC 操作事务
+
+> 默认开启事务，执行 executeUpdate() 时
+
+```java
+conn.setAutoCommit(false);	//开启事务，设置自动提交为 false
+conn.commit();	//提交事务
+conn.rollback();	//事务回滚
+//控制事务的 connection 与控制 SQL 的必须时同一个
+```
+
+##### DBUtils 事务操作
+
+```java
+//空参构造QueryRunner对象，获得conn用来操作事务
+QueryRunner qr = new QueryRunner();
+Connection conn = DataSourceUtil.getConnection();
+//开启事务 提交事务 回滚事务
+conn.setAutoCommit(false);
+//使用带有conn参数的update方法
+qr.update(conn,sql,param);
+conn.commit();
+conn.rollback();
+```
+
+##### 转账功能实现
+
+> DAO 层只进行数据库的操作，事务控制在 service 执行，为了保证事务控制的 conn 与数据库操作的 conn 为同一个 conn，要在 service 将创建的 connection 进行传递。
+>
+> commit 最好写在 finally 语句中。
+
+##### ThreadLocal 
+
+> 类似于 Map ，将当前线程作为 key。一个 ThreadLocal 只能绑定一个值。
+
+> 在转账功能实现中，我们将 conn 从 service 层传到了 dao 层，这种方式使得操作数据库资源的 conn 出现在了 service ，这不是我们希望看到的。由于在 web, service, dao 三成架构中，所有的方法调用都是一个线程完成的，因此我们可以通过线程绑定的方式来解决这个问题。
+
+```java
+//在DataSourceUtil中创建一个ThreadLocal对象用于绑定conn
+ThreadLocal<connection> tl = new ThreadLocal<Connection>();
+//在DataSourceUtil中封装一个获得当前连接的方法
+public static Connection getCurrentConnection() throws Exception{
+    //获得当前线程绑定的conn
+    Connection conn = tl.get();
+    if(conn == null){
+        //如果当前线程未绑定conn，则从线程池中取出一个
+        getConnection();
+        //将取出的conn绑定到当前线程
+        tl.set(conn);
+    }
+    return conn;
+}
+//在DataSourceUtil中封装事务开启，提交，回滚的方法
+public static void startTransactionn() throws Exception(){
+    Connection conn = getCurrentConnection();
+    conn.setAutoCommit(false);
+}
+public static void commit() throws Exception(){
+    Connection conn = getCurrentConnection();
+    conn.commit();
+    //将 conn 移除
+    tl.remove();
+    //将 conn 归还
+    conn.close;
+}
+public static void rollback() throws Exception(){
+    Connection conn = getCurrentConnection();
+    conn.rollback();
+}
+```
+
+##### 事务的特性 ACID	
+
+- 原子性(Atomicity)
+
+  > 事务是不可分割的单位，事务中的操作要么同时发生，要么同时回滚。
+
+- 一致性(Consistency)
+
+  > 事务前后数据的完整性必须保持一致。
+
+- 隔离性(Isolation)
+
+  > 多个事务并发执行时，互不影响。一个事务不能被其他事务所影响。
+
+- 持久性(Durability)
+
+  > 一个事务执行后，它对数据的操作就时永久性的。
+
+##### 并发访问问题(隔离性)
+
+- 脏读
+
+  > B 事务读取到 A 尚未提交的数据。要求 B 事务应不能读取到 A 事务未提交的数据
+
+- 不可重复读
+
+  > 一次事务中，两次读取的数据内容不一致。要求一个事物中多次读取的数据内容应是一致的(update)
+
+- 幻读/虚读
+
+  > 一个事务中，两次读取的数据的数量不一致。要求一个事务中多次读取的数据数量应是一致的(insert/delete)
+
+- 事务的隔离级别
+
+  > read uncommitted: 读取尚未提交的数据，不能解决并发问题
+  >
+  > read committed: 读取已提交的数据，可解决脏读
+  >
+  > repeatable read: 重读读取，可解决脏读，不可重复读
+  >
+  > serializable: 串行化，可解决所有并发问题，但性能太低，相当于锁表
+  >
+  > 性能从上到下，安全性从下到上
+
+  Oracle 默认隔离级别为 read committed, MySql 默认隔离级别为 repeatable read
+
+  > 查看 MySql 默认隔离级别：select @@tx_isolation;
+  >
+  > 设置 MySql 的隔离级别：set session transaction isolation level value;
+
+### 商城后台系统
+
+##### 查询功能
+
+##### 添加功能
+
+##### 删除功能
+
+- 友情提示(JS)	
+
+  ```jsp
+  <script>
+  	function delProduct(pid){
+  		var isDel = confirm("确认删除？")；
+          if(isDel){
+              window.location.href = "${pageContext.request.contextPath }/del?pid="+pid;
+          }else{
+              
+          }
+  	}
+  </script>
+  
+  <!-- javascript:void(0); 此代码可阻止a标签内置点击事件 -->
+  <a href="javascript:void(0);" onclick="delProduct('${pro.pid }')"></a>
+  ```
+
+  
+
+> 逻辑删除：改变商品状态，实则为 update 操作
+>
+> 物理删除：从数据库真实删除(传递商品 pid 参数)，delete 操作
+
+- 添加功能：删除多个商品
+
+##### 修改功能
+
+- 数据回显
+
+  > 下拉框的回显(JS, JQurey)
+
+- 数据修改
+
+  > 前台传递数据到 service ，post 提交方式下可通过 type 为 hidden 的 input 标签进行传递
+
+  ```jsp
+  <input type="hidden" name="pid" value="${product.pid }" />
+  ```
+
+##### 筛选功能
+
+> vo 包，类似于 domain 包，又来封装零散的值对象
+
+> 筛选功能中条件个数是不确定的，因此要通过判断来拼接 SQL 语句。
+>
+> 筛选后筛选条件的回显。
+
+### 分页
+
+- 分页栏
+
+  > PageBean 封装需要的散装数据，当前页商品数据，当前页数，总页数，总商品数量等
+
+### Ajax
+
+##### 同步异步
+
+> 同步现象：客户端发送请求到服务端，当服务器返回响应之前，客户端处于等待卡死状态
+>
+> 异步现象：客户端发送请求到服务端，无论服务器是否返回响应，客户端可以随意操作
+
+##### Ajax 运行原理
+
+> 页面发起请求，请求会被发送给浏览器内核中的 Ajax 引擎，Ajax 引擎会提交请求到客户端，这段时间内，客户端可以进行任意操作，直到服务端返回数据给 Ajax 引擎后，会触发你的设置事件，执行 js 逻辑代码完成页面功能。
+
+##### Js 原生 Ajax（了解）
+
+使用步骤：
+
+> 1. 创建 Ajax 引擎对象
+> 2. 为 Ajax 引擎对象绑定监听
+> 3. 绑定提交地址
+> 4. 发送请求
+> 5. 接受响应数据
+
+```js
+function ajaxFn() {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() {	//引擎具有5个状态(readyState)，01234
+        if(xmlHttp.readyState==4 && xmlHttp.state==200){
+            var data = xmlHttp.responseText;
+        }
+    }
+    //true代表异步访问，get提交方式可直接拼接参数，post提交参数在send()中传递，并需要加头信息(文档)。
+    xmlHttp.open("GET","客户端地址",true);
+    xmlHttp.send();
+}
+```
+
+##### Json
+
+> Json 是一种数据交换格式，作用：1. 使用 Ajax 进行前后台数据交换； 2. 移动端与服务端的数据交换
+>
+> Json 是 Js 的原生格式，Js 可以直接取出 Json 对象中的数据，key 为字符串，value 为 Object
+
+- 两种格式
+
+  > 对象格式：{"key1":obj1, "key2":obj2, "key3":obj3}
+  >
+  > 数组格式：[obj1, obj2, obj3]
+  >
+  > 对象格式可以和数组格式互相嵌套
+
+##### JQuery 中的 Ajax
+
+- $.ajax({option1:value1,option2:value2})
+
+  ```js
+  function fnAjax(){
+      $.ajax(
+      	url:"客户端地址",
+          async:是否异步,
+          type:"请求方式",
+          data:{请求参数json格式},
+          success:function(data){	//请求成功的回调函数
+          
+      	},
+          error:function(){	//请求失败的回调函数
+                  
+          },
+          dataType:"返回数据格式"
+      );
+  }
+  ```
+
+  
+
+- $.get(url, [data], [callback], [type])
+
+  ```js
+  function fnGet() {
+      $.get(
+      	"",	//url地址
+          {"name":"zhangsan","age":"25"},	//请求参数
+          function(data){	//执行成功后的回调函数 data代表服务器返回的数据，类型与返回类型一致
+              //Java中无Json对象，直接书写Json格式的字符串即可，但不能使用单引号，因为Ajax会默认调用parseJson方法，当传入畸形Json时此方法会报错
+          },
+          "json"
+      );
+  }
+  ```
+
+- $.post(url, [data], [callback], [type])
+
+  > 代码与 get 方法相同
+  >
+  > 区别：1. 提交的参数大小限制不同； 2. 接受数据的中文乱码问题，post 方式不会出现乱码
+
+##### 异步校验用户名是否存在
+
+##### 站内查询
+
+- Json 转换工具
+
+  > 1. jsonlib	需导入jason-lib jar包	JsonArray.for
+  > 2. gson---->google    需导入gson包    gson.toJson();
+  > 3. fastjson---->alibaba
