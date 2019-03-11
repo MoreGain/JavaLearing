@@ -1297,11 +1297,11 @@ ${key}
 
     ```jsp
     //具有两种方式
-    <c:foreach begin="0" end="5" var="i">
-    </c:foreach>
+    <c:forEach begin="0" end="5" var="i">
+    </c:forEach>
     
-    <c:foreach item="集合或数组" var="集合中某一个元素">
-    </c:foreach>
+    <c:forEach items="集合或数组" var="集合中某一个元素">
+    </c:forEach>
     ```
 
 ##### JavaEE 开发模式
@@ -1627,3 +1627,352 @@ function ajaxFn() {
   > 1. jsonlib	需导入jason-lib jar包	JsonArray.for
   > 2. gson---->google    需导入gson包    gson.toJson();
   > 3. fastjson---->alibaba
+
+### 监听器
+
+监听三个域对象（page 域除外）状态变化的组件
+
+##### 相关概念
+
+> 事件源：被监听的对象
+>
+> 监听器
+>
+> 注册监听器
+>
+> 响应行为
+
+##### 响应分类
+
+###### 监听域对象的创建与销毁
+
+- ServletContextListener
+
+  > 监听 ServletContext 域的创建与销毁
+
+  创建步骤：
+
+  ```java
+  //a.编写监听器类实现监听器接口
+  //b.覆盖监听器的方法
+  public class MyServletContextListener implemtnes ServletContextListener {
+      //监听context域的创建
+      public void contextInitialized(ServletContextEvent sce){
+          sce.getServletContext();	//获得被监听的对象
+          sce.getSource();	//获得被监听的对象，通用方法
+          System.out.println(context创建了...)；
+      }
+      //监听context域的销毁
+      public void contextDestroyed(ServletContextEvent sce){
+          System.out.println(context销毁了...)；
+      }
+  }
+  //c.在web.xml中进行配置---->注册
+  <listener>
+  	<listener-class>完整包路径</listener-class>
+  </listener> 
+  ```
+
+  作用：
+
+  > 1. 初始化工作（如初始化连接池，加载数据库驱动，能不用静态最好别用）
+  > 2. 加载一些初始化配置文件（如spring的配置文件）
+  > 3. 任务调度（如定时器，Timer/TimerTask）
+
+  ```java
+  Timer timer = new Timer();
+  timer.scheduleAtFixedRate(new TimerTask(){
+      public void run(){
+          System.out.print("任务执行了...");
+      }
+  }, new Date(), 5000);
+  ```
+
+  
+
+- HttpSessionListener
+
+  创建步骤：同ServletContextListener
+
+  > 一个 web 应用中有多个 session 对象：se.getSession().getId();
+  >
+  > 访问一个 jsp 时会默认创建 session 对象，由于page 指令中 session 属性为 true；
+  >
+  > 作用：可用于计数应用有多少客户端访问
+
+- ServletRequestListener
+
+###### 监听域对象的属性变化
+
+> setAttribute();    removeAttribute();
+
+- ServletContextAttributeListener
+
+  > 监听添加、修改、删除操作
+
+- HttpSessionAttributeListener
+
+- ServletRequestAttributeListener
+
+###### 与 session 中绑定的对象相关的监听器（对象感知监听器）
+
+- 将被绑定的 session 对象的状态
+
+  > 绑定：
+  >
+  > 解绑：
+  >
+  > 钝化：将 session 内存中的对象持久化到磁盘
+  >
+  > 活化：将磁盘上的对象再次恢复到 session 中
+
+  >  用户很多时，如何对服务器进行优化？	
+
+- HttpSessionBindingListener(注册给将绑定到 session 对象)
+
+```java
+//此监听器不需要配置
+public class Person implements HttpSessionBindingListener{
+    private String name;
+    private int age;
+    //绑定方法
+    public void valueBound(HttpSessionBindingEvent event){
+        
+    }
+    //解绑方法
+    public void valueUnbound(HttpSeesionBindingEvent event){
+        
+    }
+}
+```
+
+- HttpSessionActivationListener
+
+```java
+//此监听器不需要配置
+public class Person implements HttpSessionActivationListener, Serlizable{
+    private String name;
+    private int age;
+    //钝化方法
+    public void sessionWillPassivate(HttpSessionEvent se){
+        
+    }
+    //活化方法
+    public void sessionDidActivate(HttpSeesionEvent se){
+        
+    }
+}
+```
+
+> 服务器关闭对象会自动被钝化
+>
+> 服务器开启对象会自动被活化
+>
+> 可通过配置文件设置对象何时被钝化，在 META-INF 中添加一个 xml 文件进行配置 
+
+##### 邮箱服务器
+
+> 邮箱服务器：进行邮件的接受与推送
+>
+> 邮件发送的协议：
+>
+> ​	接受邮件的协议：POP3	IMAP
+>
+> ​	发送邮件的协议：SMTP
+
+- 邮件发送过程
+
+  ![](C:\Users\admin\Desktop\笔记\image\mailSendProcess.png)
+
+- 通过程序自动发送邮件
+
+  > mail.jar	MailUtil.java
+
+##### 定时发送生日祝福
+
+> 通过 ServletContextListener 监听器，使用任务调度功能，结合邮件自动发送程序即可完成，TimerTask 即为定时发送邮件
+
+### Filter 过滤器
+
+##### 概述
+
+​	filter 是对客户端访问资源的过滤，符合条件的放行，不符合条件的不放行，并且可以对目标资源访问前后进行逻辑处理。
+
+​	场景：公共代码提取，对 request, response 的方法进行增强，权限设置......
+
+##### 使用步骤
+
+> 1. 编写一个过滤器的类实现 Filter 接口
+> 2. 实现接口方法(doFilter())
+> 3. 在 web.xml 中进行配置(配置对那些资源进行过滤)
+
+```java
+public class MyFilter implements Filter{
+    //config可获得ServletContext对象
+    public void init(FilterConfig config){}
+    //FilterChain:过滤器链对象（它知道一切filter对象）
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain){
+        chain.doFilter(request, response);
+    }
+    public void destroy(){}
+}
+```
+
+```xml
+<!-- filter 配置 -->
+<filter>
+	<filter-name></filter-name>
+    <filter-class></filter-class>
+</filter>
+<filter-mapping>
+	<filter-name></filter-name>
+    <!-- 具有三种配置方式 -->
+    <!-- /*表示对所有访问资源进行过滤,执行顺序按mapping的出现顺序 -->
+    <url-pattern>/*</url-pattern>
+    <servlet-name>效果同url-pattern</servlet-name>
+    
+    <!--
+		访问的方式：
+			REQUEST:默认值，直接访问某个资源时执行
+			FORWARD:转发时才执行
+			INCLUDE:包含资源时执行
+			ERROR:发生错误时执行
+	-->
+    <dispatcher>REQUEST</dispatcher>
+</filter-mapping>
+```
+
+##### API
+
+> init()	//filter 何时创建：服务启动时创建
+>
+> doFilter()	//每次访问被过滤的 servlet 对象时执行
+>
+> destroy()	//filter 何时销毁：服务器关闭时销毁
+
+##### 自动登录功能
+
+> 登录成功后将 user 对象放入 session 域中：1.返回别的资源时根据用户是否登录； 2.user 的信息在任何地方都可能用到
+>
+> 自动登录：在 servlet 中判断是否需要自动登录，若需要，将信息存储到 cookie 中，下次访问时通过过滤器获得 cookie 中的用户信息并存入 session
+>
+> cookie 不能存入中文字符，为了解决这个问题，可在存入之前对数据进行编码，获取时再对数据进行解码
+>
+> ​	URLEecoder.encode(String s, String character);
+>
+> ​	URLDecoder.decode(String s, String character);
+
+##### 全局乱码问题解决
+
+> 在 filter 中抽取乱码解决代码：
+>
+> ​	response.setContextType("text/html;charset=utf8");
+>
+> ​	request.setCharacteEncoding("utf8");
+>
+> 以上方式对于 get 提交方式获取的参数乱码问题无法解决，因此可通过装饰者设计模式增强 request 的 getParameter() 方法来解决 get 提交方式的乱码问题，HttpServletRequestWrapper 类对 request 接口的方法提供了实现，适用于对 request 的方法进行增强
+
+
+
+### 类加载器
+
+- 类加载器运行过程
+
+  ![](C:\Users\admin\Desktop\笔记\image\类加载器.png)
+
+- 类加载器分类
+
+  > BootStrap: 引导类加载器，加载最基础的文件	rt.jar
+  >
+  > ExtClassLoader: 扩展类加载器，加载基础的文件	lib/ext/*.jar
+  >
+  > AppClassLoader: 应用类加载器，加载三方 jar 包和自己编写的文件
+  >
+  > 自定义类加载器
+
+- 获得类加载器
+
+  > ClassLoader cl = this.getClass().getClassLoader;
+  >
+  > cl.getResource(” “).getPath();	//获得 src 下的任何资源的地址，获得某包下的资源，需要添加包路径
+  >
+  > cl.getResourceAsStream(" ");	//获得某个文件的流对象
+
+  
+
+### 注解
+
+​	注解是符合一定格式的语法，并具有一定的功能(@xxx)，主要作用是代替配置文件
+
+​	优点：开发效率高，成本低
+
+​	缺点：耦合性大，不利于后期维护
+
+##### jdk5 提供的注解
+
+> @Override	//帮助开发人员检查是否正确覆盖父类的方法
+>
+> @SuppressWarnings("all")	//可用于属性，方法，类
+>
+> @Deprecated
+
+##### 自定义注解
+
+```java
+public @interface MyAnno {
+    //注解的属性:基本类型，String类型，枚举类型，注解类型，Class类型，以上的一维数组类型
+    String name();
+    int age() default 10;
+    String[] value();
+}
+```
+
+##### 元注解
+
+> @Target({TYPE, FIELD, METHOD,PARAMETER, CONSTRUCTOR, LOCAL_VARIABLE}) //注解使用范围
+>
+> @Retention(RetentionPolicy.SOURCE) //注解可见级别 SOURCE/CLASS/RUNTIME
+
+##### 注解解析（通过反射）
+
+
+
+### 动态代理
+
+##### 代理
+
+- 静态代理
+
+  
+
+- 动态代理
+
+  ```java
+  //Proxy.newProxyInstance(ClassLoader loader, Class<?>[] interfaces, InvocationHandler h) 
+  public class ProxyTest{
+      public static void main(String[] args) {
+          //获得动态代理的代理对象----在运行时，在内存中动态的为Target创建一个虚拟的代理对象
+          //objProxy是代理对象 根据参数确定到底是谁的代理对象
+          TargetInterface objProxy = Proxy.newProxyInstance(
+              //与目标对象相同的类加载器
+          	Target.class.getClassLoader(),
+              new Class[]{TargetInterface.class},
+              new InvocationHandler(){
+                  //proxy 代表代理对象
+                  //invoke 代表的是执行代理对象的方法
+                  //method 代表的是目标对象的方法字节码对象
+                  //args 代表目标对象的相应方法的参数
+                  public Object invoke(Object proxy, Method method, Object[] args) throws Throwable{
+                      //执行目标对象的方法，可在此方法前后进行逻辑处理
+                      method.invoke(new Target(), args);
+                      return null;
+                  }
+              }
+          );
+          
+          objProxy.method1();	//代理对象调用接口具有的方法
+      }
+  }
+  ```
+
+  
