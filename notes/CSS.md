@@ -179,3 +179,83 @@ css 中，有一些属性，某元素设置后，它的后代元素就都拥有�
 >
 > !important不影响就近原则，远的那个，写上!important也没用，还是以近的那个为准
 
+### css 颜色表示法
+
+###### 单词表示
+
+```css
+p {
+    color: red;
+}
+```
+
+black、white、red、green、blue、yellow、pink、orange、purple、gold、gray、yellowgreen、greenyellow
+
+###### rgb() 表示
+
+```css
+p {
+    color: rgb(255,0,0);
+}
+```
+
+> 红色： rgb(255,0,0)	绿色： rgb(0,255,0)	蓝色： rgb(0,0,255)
+>
+> 白色：rgb(255,255,255)	黑色：rgb(0,0,0)	灰色：rgb(100,100,100)
+>
+> ###### 十六进制表示
+
+```css
+p {
+    color: #ffffff;
+}
+```
+
+> 红色：#ff00 或 #f00
+
+### css 文字属性
+
+###### color
+
+文字颜色
+
+###### font-size
+
+文字大小，单位可为 px、em、rem。汉字不是顶天立地的，所以量测出的尺寸可能小于实际尺寸
+
+###### line-height
+
+文字行高，即文字所在行的高度，文字在行中垂直居中，单位可为 px 或使用百分比
+
+###### font-family
+
+文字字体，设置字体必须为用户电脑有的字体，否则为宋体。为了用户体验一致，一般只使用宋体、微软雅黑，可通过逗号设置备选字体
+
+```css
+p {font-family: "微软雅黑","宋体";}
+```
+
+将字体名设置为英语可提升 css 加载速度
+
+```css
+p {font-family: "Microsoft","SimSun";}
+```
+
+font 属性合并书写，font-size/line-height font-family
+
+```css
+p {font: 14px/28px "宋体";}
+```
+
+###### font-weight
+
+文字加粗，值可为 bold(700px)、normal(400px)
+
+###### font-style
+
+文字样式， `italic` `oblique` 表示文字倾斜
+
+###### text-decoration
+
+文字下划线，值可为 `` `` `underline` `none` `line-through` `overline`
+
