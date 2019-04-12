@@ -173,7 +173,7 @@ css 中，有一些属性，某元素设置后，它的后代元素就都拥有�
 }
 ```
 
-> 提升权重一般只在原子类的情况使用
+> 提升权重只能在原子类的情况使用，此时权重为无限大
 
 > !important不影响继承性，一个标签是通过继承性影响的，权重是0，加上!important也是0
 >
@@ -184,9 +184,7 @@ css 中，有一些属性，某元素设置后，它的后代元素就都拥有�
 ###### 单词表示
 
 ```css
-p {
-    color: red;
-}
+p {color: red;}
 ```
 
 black、white、red、green、blue、yellow、pink、orange、purple、gold、gray、yellowgreen、greenyellow
@@ -194,9 +192,7 @@ black、white、red、green、blue、yellow、pink、orange、purple、gold、gr
 ###### rgb() 表示
 
 ```css
-p {
-    color: rgb(255,0,0);
-}
+p {color: rgb(255,0,0);}
 ```
 
 > 红色： rgb(255,0,0)	绿色： rgb(0,255,0)	蓝色： rgb(0,0,255)
@@ -206,9 +202,7 @@ p {
 > ###### 十六进制表示
 
 ```css
-p {
-    color: #ffffff;
-}
+p {color: #ffffff;}
 ```
 
 > 红色：#ff00 或 #f00
@@ -238,7 +232,7 @@ p {font-family: "微软雅黑","宋体";}
 将字体名设置为英语可提升 css 加载速度
 
 ```css
-p {font-family: "Microsoft","SimSun";}
+p {font-family: "Microsoft Yahei","SimSun";}
 ```
 
 font 属性合并书写，font-size/line-height font-family
@@ -258,4 +252,37 @@ p {font: 14px/28px "宋体";}
 ###### text-decoration
 
 文字下划线，值可为 `` `` `underline` `none` `line-through` `overline`
+
+###### font 属性综合
+
+```css
+p {font: italic bold 12px/24px arial;}
+/*通常以如下方式综合*/
+p {font: 12px/24px "Mircosoft Yahei";}
+```
+
+### 盒子模型
+
+盒子具有 width、height、border、padding、margin 几大属性
+
+盒子真实占有宽度为：width+padding-left+padding-right+border-left+border-right
+
+###### padding
+
+内边距，内容和边框的距离
+
+```css
+div {
+    /*四个方向padding均为20*/
+    padding: 20px;
+    /*上下为10px，右左为20px*/
+    padding: 10px 20px;
+     /*上为10px，右左为20px，下为30px*/
+    padding: 10px 20px 30px;
+    /*依次为上、右、下、左的padding*/
+    padding: 10px 20px 30px 40px;
+}
+```
+
+
 
