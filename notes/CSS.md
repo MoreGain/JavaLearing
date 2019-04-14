@@ -445,3 +445,141 @@ div {clear: both;}
 
 ###### 隔墙清除浮动
 
+```html
+<div class="float_left">
+
+</div>
+<div class="clear_both"></div>
+<div class="float_left">
+    
+</div>
+```
+
+在两个浮动的元素之间增加一个 div (墙)来清除浮动，使用这种方式盒子依然没有高度，且 margin 依然失效，但可以通过墙的高度来 margin
+
+###### 内墙法
+
+```html
+<div class="float_left">
+    <p>111</p>
+    <div class="clear_both"></div>
+</div>
+<div class="float_left">
+    <p>111</p>
+    <div class="clear_both"></div>
+</div>
+```
+
+在浮动的元素最后添加一个清除浮动的儿子 div(内墙)，这种方式下盒子具有高度，margin 也能正常使用，但会导致没有语义的 HTML 标签增多
+
+###### overflow: hidden 清除浮动
+
+给没有高度的盒子加上 `overflow: hidden;` ，盒子具有高度，且 margin 可用
+
+> 实际工作中：给内部有浮动的盒子加上 overflow: hidden；
+>
+> ​			在两个大部分之间添加外墙
+
+### 超链接美化
+
+###### 伪类
+
+一个超级链接，根据用户的点击情况，有自己的样式，总共具有四种状态
+
+> a:link	没有访问的链接
+>
+> a:visited	已经访问的链接
+>
+> a:hover	鼠标悬停的时候
+>
+> a:active	鼠标按下的时候
+
+它们叫做伪类，这些状态是由用户指定的，在页面编辑时我们只能定义，不知道具体属于什么类
+
+伪类的四个顺序必须为 link、visited、hover、active，可以省略但顺序不能变，否则可能造成样式混乱
+
+###### 伪类使用
+
+一般的，我们都会把 a:link、a:visited 写在一起，不使用 a:active
+
+a 要转块、设置宽高(如导航栏)，一般把盒模型的属性写在 a 这个选择器里。把关于文字的属性，写在伪类选择器中
+
+伪类的权重和类一样
+
+### background 属性
+
+###### background-color
+
+```css
+div {background: red;}
+```
+
+背景颜色属性
+
+###### background-image
+
+```css
+div {background-image: url(images/1.jpg);}
+```
+
+背景图片属性，默认会横向、纵向铺满盒子
+
+###### background-repeat
+
+此属性可设置背景图片的平铺方式，值可为 `no-repeat` `repeat-x` `repeat-y`
+
+###### background-position
+
+```css
+div {
+    background-image: url(images/1.jpg);
+    background-position: 100px 200px;
+}
+```
+
+图片位置属性，以上效果为让盒子向右移动 100px，向下移动 200px，向左向下移动要使用负数
+
+```css
+div {background-position: left center;}
+```
+
+也可使用 `left` `right` `center` `top` `bottom`来定位	
+
+> CSS 雪碧技术：指把多个小杂碎图片，合成一张图片，然后用 background-position 定位只显示其中某一部分。这样能够显著降低 HTTP 请求数
+
+> background-position: center top; 经常用于大背景、通栏 banner 的制作
+
+###### background-attachment
+
+```css
+div {background-attachment: fixed;}
+```
+
+背景附属属性，它的值 `fixed` 可用于固定背景
+
+```css
+div {background: color url(1.jpg) no-repeat center top fixed;}
+```
+
+背景属性综合写法
+
+###### 背景图的应用
+
+- 图换文字
+
+  ```css
+  .header h1{
+  	width: 221px;
+  	height: 68px;
+  	background:url(images/logo.png);
+  	text-indent: -999em;   /*赶走文字，让用户看不到文字*/
+  }
+  ```
+
+  例如将 logo 图片放到 h1 标签，但又希望 h1 里是文字，利于搜索引擎识别
+
+- 先导符号放到 padding
+
+- CSS 精灵
+
+  先导符号一定要放到精灵图的最右边
