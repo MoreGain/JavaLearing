@@ -294,6 +294,35 @@ JS 中有基本类型，也有引用类型，引用类型有很多种：object�
 
 基本类型保存值，引用类型保存地址
 
+###### 同名函数
+
+JS 中实参个数和形参个数可以不一样，JS 没有重载概念，只要存在同名的函数，后写的就会覆盖先写的
+
+###### arguments
+
+JS 每一个函数内部，都有一个 arguments 类数组对象，这个对象涵盖了所有实参
+
+```js
+function add(a,b){ ... }
+
+add(5,6,7,8)	//arguments[0]=5,arguments[1]=6,arguments[2]=7
+```
+
+arguments 可以用来模拟函数的重载
+
+```js
+function add(a,b) {
+    switch(arguments.length){
+    	case 1:
+    		return a;
+            break;
+    	case 2:
+            return a+b;
+            break;
+    }
+}
+```
+
 ### 作用域
 
 ###### 变量作用域
@@ -715,4 +744,449 @@ m	表示多行匹配
 | 表示或
 
 ###### 分组
+
+### IIFE(immediately-invoked function expression)
+
+即时调用函数表达式，即一个函数，在定义的时候就调用它
+
+```js
+(function(a,b){
+    return a+b;
+})(5,6);
+```
+
+这种方式定义的函数，名字无效，其他地方不能调用
+
+### 数组闭包
+
+以下现象就是因为每个函数在定义时都产生了闭包
+
+```js
+var arr = [];
+for(var i=0; i<=10; i++) {
+    arr[i] = function() {
+        alert(i);
+    }
+}
+arr[3]();	//11	
+arr[6]();	//11
+arr[8]();	//11
+```
+
+解决方案，使用 IIFE，因为 IIFE 里面的作用域时隔离的
+
+```js
+for(var i=0; i<=10; i++) {
+    (function(m){
+        arr[m] = function() {
+            alert(m);
+        }
+    })(i);
+}
+```
+
+### DOM(document object model)
+
+DOM 描绘了一个层次化的节点树，允许开发人员添加、删除和修改页面的某一部分，通过 JS 操作 HTML，就是在操作节点
+
+###### 得到元素
+
+最基本的得到元素的方法有两个，这两个方法得到元素是所有浏览器都兼容的
+
+> document.getElementById()
+
+通过 Id 得到一个元素
+
+> document.getElementsByTagName()
+
+通过标签名得到元素组，它返回一个结果数组，就算只有一个元素也是数组
+
+其他得到元素方法，这些方法不是所有浏览器都兼容的
+
+> document.getElementsByClassName()	通过类名得到元素
+>
+> document.querySelector()	通过选择器得到元素
+
+document 对象表示文档，即整个页面
+
+###### 更改属性
+
+可通过 `点语法` `setAttribute()` `getAttribute()` 更改属性
+
+```html
+<img src="i.jpg" id="img1"/>
+<script>
+    var oImg = document.getElementById("img1");
+	oImg.src = "2.jpg";
+    oImg.setAttribute("src","2.jpg");
+</script>
+```
+
+要通过点语法更换一个元素的 class 属性，需使用className，class 是保留字，还有一些属性也需要避讳
+
+> for 写为 htmlFor
+>
+> rowspan 写为 rowSpan
+>
+> colspan 写为 colSpan
+
+自定义的属性不能通过点语法得到，但可以通过 setAttribute 得到
+
+行内样式通过点语法的到一个样式对象，但通过 getAttribute 得到的是字符串
+
+getAttrbute 获得属性时不需要避讳关键字
+
+点语法效率远高于 getAttribute、setAtrribute
+
+###### 操作元素样式
+
+通过点语法 `.style` 可以得到行内样式的封装，不能得到内嵌、外联样式
+
+```html
+<div id="div1" style="border: 1px solid red"></div>
+<script>
+	var oDiv = document.getElementById("div1");
+    oDiv.style.border = "5px dashed black";
+</script>
+```
+
+通过 `Element.style.css` 样式名可以得到某一样式，所有 css 连字符的样式，都要转换为驼峰形式 ，通过这样方式操作样式读、设都在行内
+
+> 信号量(semaphor)思维模式：信号量不用添加行内样式
+
+###### 事件监听
+
+> ![DOM event](../images/DOM event.png)
+
+###### 批量添加事件
+
+给页面上所有 p 添加 click 事件
+
+```js
+var oPs = document.getElementsByTagName("p");
+for(var i=0; i<oPs.length; i++) {
+    oPs[i].onclick = function(){
+        alert(i);	//点击每个 p 都会弹出 length
+    }
+}
+```
+
+这种 for 循环添加监听语句会出现闭包
+
+解决方案
+
+```js
+var oPs = document.getElementsByTagName("p");
+for(var i=0; i<oPs.length; i++) {
+    (function(m){
+    	oPs[m].onclick = function(){
+        	alert(m);
+    	} 
+    })(i);
+}
+```
+
+```js
+var oPs = document.getElementsByTagName("p");
+for(var i=0; i<oPs.length; i++) {
+    oPs[i].idx = i;
+    oPs[i].onclick = function(){
+        alert(this.idx);
+    } 
+}
+```
+
+###### 对应和排他
+
+### 计算后样式
+
+###### 高级浏览器
+
+> window.getComputedStyle(oDiv).getPropertyValue("border-style")
+>
+> getComputedStyle(oDiv).getPropertyValue("border-style")
+>
+> getComputedStyle(oDiv)["border-style"]
+
+getPropertyValue 接收 css 属性名称，不用驼峰式名称
+
+###### 低级浏览器(IE 6、7、8)
+
+它们不兼容 `getComputedStyle().getPropertyValue()` ，只能使用另一套写法，使用 `currentStyle` 属性，需要使用驼峰形式
+
+> oDiv.currentStyle.borderStyle
+>
+> oDiv.currentStyle["barderStyle"]
+
+###### 能力检测
+
+为了让所有浏览器兼容，需要根据浏览器版本执行不同语句，可以通过能力检测完成，就不用在判断浏览器版本
+
+```js
+if(window.getComputedStyle){
+    getComputedStyle(oDiv)["padding-left"];
+}else{
+    oDiv.currentStyle.paddingLeft;
+}
+```
+
+### 快捷位置和尺寸
+
+> ele.offsetLeft
+>
+> ele.offsetTop
+>
+> ele.offsetWidth
+>
+> ele.offsetHeight
+>
+> ele.clientWidth
+>
+> ele.clientHeight
+
+###### offsetLeft 和 offsetTop
+
+这两个属性不是所有浏览器兼容
+
+一个元素的 offsetLeft 值，就是这个元素左边框外，到自己的 offsetParent 对象的左边框内的距离
+
+offsetParent：无论自己是否定位，自己的祖先元素中，离自己最近的已经定位的元素，没有任何盒子定位，那么 offsetParent 对象就是 body
+
+> IE 6、7：如果自己没有定位属性，那么自己的 offsetParent 对象就是自己的祖先元素离自己最近的有 width 或者有 height 的元素；如果自己有定位，那么 offset 就是离自己最近的有定位祖先元素
+>
+> IE 8：无论自己是否定位，offsetParent 就是离自己最近的已定位祖先元素，但是 offsetLeft 会算到父元素边框外部，即多算一条边
+
+###### offsetWidth 和 offsetHeight
+
+这两个属性所有浏览器兼容，它们是盒子自己的属性
+
+offsetWidth 的值就是：width + 左右 padding + 左右 border
+
+如果盒子没有宽度，浏览器把 px 当做 offsetWidth
+
+如果盒子没有高度，用文字撑的，浏览器把 px 当做 offsetHeight
+
+###### clientWidth 和 clientHeight
+
+clientWidth 的值为：width + 左右 padding
+
+### 运动
+
+###### 定时器
+
+```js
+setInterval(function(){
+    alert(new Date().getSeconds());
+},1000)
+```
+
+`setInterval(function,time)` 是 window 对象的方法，它使某个函数每隔一段时间执行一次
+
+通过 `clearInterval()` 可以停止定时器
+
+```js
+timer = setInterval(function(){},20);
+clearInterval(timer);
+```
+
+###### 定时器运动注意点
+
+```js
+startBtn.onclick = function(){
+    setInterval(function(){
+        nowleft +=2;
+        oDiv.style.left = nowleft + "px";
+    },20);
+}
+```
+
+如以上脚本当点击开始按钮时盒子以 2px/20ms 速度运动，连续点击按钮会导致盒子运动加快，解决方案，设表先关
+
+```js
+startBtn.onclick = function(){
+    cleatInterval(timer);
+    timer = setInterval(function(){
+    	nowleft +=2;
+    	oDiv.style.left = nowleft + "px";
+    },20);
+}
+```
+
+### JSON
+
+###### JSON 语法
+
+```js
+var obj = {
+    "name": "zhangsan",
+    "age": 18，
+    "sex": "male"
+};
+```
+
+JSON 语法为 `"k":v` 形式，可以通过点语法或 `[]` 来获取属性的值
+
+```js
+obj.name
+obj["name"]
+```
+
+###### JSON 的嵌套
+
+json 里的 v，也可以还是一个 json
+
+```js
+var obj = {
+    "name": "lisi",
+    "age": 18,
+    "sex": "male",
+    "hobby": {
+        "hobbyOne": "basketball",
+        "hobbyTwo": "soccer",
+        "hobbyThree","baseball"
+    }
+};
+```
+
+###### JSON 的添加与删除
+
+通过点语法可以向 JSON 中添加值
+
+```js
+var obj = {
+    "name": "zhangsan",
+    "age": 18,
+};
+obj.sex = "male";
+```
+
+使用 delete 关键字可以删除 json 中某个属性
+
+```js
+delete obj.age;
+```
+
+###### JSON 的遍历
+
+json 是通过 `for···in` 语句来遍历的
+
+```js
+for(var k in obj) {
+    alert(obj[k]);
+}
+```
+
+### 运动框架
+
+让 oDiv 盒子 3000ms 后运动到终点
+
+```js
+animate(oDiv,{"width":700,"height":250},3000)
+```
+
+### 异步和回调函数
+
+###### 同步和异步
+
+同步 Synchronous：程序从上到下依次执行
+
+异步 Asynchronous：程序不再从上到下执行
+
+JS 中的异步，需要异步语句，setInterval、setTimeout、Aajx、Node.js......，存在异步语句，则程序异步执行
+
+###### 回调函数
+
+异步的语句做完之后要做的事情
+
+```js
+var count = 0;
+var timer = setInterval(function(){
+    console.log(count);
+    count++;
+    if(count>300){
+        clearInterval(timer);
+        callback();
+    }
+},20);
+function callback(){
+    alert("timer finished");
+}
+```
+
+###### apply 和 call 语句
+
+在回调函数中，不能直接使用 this 来表示当前对象，但通过 apply 或 call 语句可以实现
+
+```js
+var obj = {
+    "name": "zhangsan",
+    "age": 12
+};
+function callback(){
+    console.log(this.name)
+}
+callback.call(obj);
+callback.apply(obj);
+```
+
+apply 和 call 语句功能相同，都是让函数调用，并且给函数设置 this 表示谁，他们的区别是当函数有参数时，参数传入方式不同
+
+```js
+function callback(a,b,c){}
+callback.call(obj,param1,param2,param3);
+callback.apply(obj,[param1,param2,param3]);
+```
+
+###### 缓冲
+
+缓冲算法
+
+```js
+function linear(t, b, c, d){
+    return c * t / d + b;
+}
+function easeIn(t, b, c, d){
+    return c * ( t /= d) * t + b;
+}
+function easeOut(t, b, c, d){
+    return -c * (t /= d) * (t - 2) + b;
+}
+```
+
+t 表示当前帧编号，b 表示其实位置，c 表示变化量，d 表示总帧数
+
+函数的返回值，就是 t 这一帧，元素应该在的位置
+
+### 延时器
+
+通过 `setTimeout()` 可以设置延时器，延时器在指定时间后执一次
+
+```js
+setTimeout(function(){
+    alert("延时器");
+},3000);
+```
+
+延时器也可以清除
+
+```js
+clearTimeout();
+```
+
+### 函数节流
+
+函数节流，即希望一些函数不要连续的触发
+
+经典函数节流模型
+
+```js
+var lock = true;
+input.onclick = function(){
+    if(!lock) return;
+    lock = false;
+    setTimeout(function(){
+        lock = true;
+    },1000);
+}
+```
 
