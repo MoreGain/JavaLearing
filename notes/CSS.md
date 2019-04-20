@@ -1,5 +1,9 @@
 # CSS
 
+[TOC]
+
+
+
 ### 概述
 
 css(cascading style sheet) 是层叠样式表，用于改变页面的样式
@@ -208,8 +212,8 @@ p {color: rgb(255,0,0);}
 > 红色： rgb(255,0,0)	绿色： rgb(0,255,0)	蓝色： rgb(0,0,255)
 >
 > 白色：rgb(255,255,255)	黑色：rgb(0,0,0)	灰色：rgb(100,100,100)
->
-> ###### 十六进制表示
+
+###### 十六进制表示
 
 ```css
 p {color: #ffffff;}
@@ -404,12 +408,12 @@ border 是一个组合属性，由三部分构成
 
 浮动就是将文档脱离标准流，脱离后就没有了标准流的行块之分了
 
-脱离标准流有三种方式：浮动、绝对定位、相对定位
+脱离标准流有三种方式：浮动、绝对定位、固定定位
 
 ```css
 div {
     /*浮动*/
- 	float: left;
+    float: left;
     /*绝对定位*/
     position: absolute;
     /*固定定位*/
@@ -532,7 +536,7 @@ div {background: red;}
 div {background-image: url(images/1.jpg);}
 ```
 
-背景图片属性，默认会横向、纵向铺满盒子
+背景图片属性，默认会横向、纵向平铺
 
 ###### background-repeat
 
@@ -547,7 +551,7 @@ div {
 }
 ```
 
-图片位置属性，以上效果为让盒子向右移动 100px，向下移动 200px，向左向下移动要使用负数
+图片位置属性，以上效果为让盒子向右移动 100px，向下移动 200px，向左向上移动要使用负数
 
 ```css
 div {background-position: left center;}
@@ -603,7 +607,7 @@ CSS 三大技术：盒模型、浮动、定位，这三大技术负责了网页�
 ```css
 div {
     position: relative;
-	top: 100px;
+    top: 100px;
     left: 100px;
 }
 ```

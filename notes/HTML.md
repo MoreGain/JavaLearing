@@ -237,10 +237,10 @@ ol 标签表示有序列表，它的使用与 ul 标签一致
 
 ```html
 <dl>
-	<dt>HTML</dt>
+    <dt>HTML</dt>
     <dd>HTML是超文本标记语言</dd>
     
-	<dt>css</dt>
+    <dt>css</dt>
     <dd>css是层叠样式表</dd>
     
     <dt>javascript</dt>
@@ -330,7 +330,7 @@ dt(definition title) 与 dd(definition description) 在 dl 标签中交替出现
 
 ```html
 <table>
-	<tr>
+    <tr>
         <td></td>
         <td></td>
     </tr>
@@ -356,19 +356,19 @@ th 标签与 td 都代表单元格，th 具有表头的语义
     <caption>表格标题</caption>
     <thead>
         <tr>
-        	<th>表头一</th>
+            <th>表头一</th>
             <th>表头二</th>
             <th>表头三</th>
         </tr>
     </thead>
     <thead>
         <tr>
-        	<td>表格数据</td>
+            <td>表格数据</td>
             <td>表格数据</td>
             <td>表格数据</td>
         </tr>
          <tr>
-        	<td>表格数据</td>
+            <td>表格数据</td>
             <td>表格数据</td>
             <td>表格数据</td>
         </tr>
