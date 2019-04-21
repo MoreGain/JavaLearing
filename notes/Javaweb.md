@@ -279,19 +279,19 @@
   >
   > get 方式提交没有请求体  
 
-  ![](C:\Users\admin\Desktop\笔记\image\http请求.png)
+  ![](../images/http请求.png)
 
 - http响应
 
   > 响应由响应行、响应头、响应体构成
 
-![](C:\Users\admin\Desktop\笔记\image\http响应.png)
+![](../images/http响应.png)
 
 ##### tomcat目录结构
 
 
 
-![](C:\Users\admin\Desktop\笔记\image\tomcat.jpg)
+![](../images/tomcat.jpg)
 
 
 
@@ -307,7 +307,7 @@
 
 ##### Web 应用目录结构
 
-![](C:\Users\admin\Desktop\笔记\image\webapp structure.jpg)
+![](../images/webapp structure.jpg)
 
 ##### Eclipse 下配置 tomcat
 
@@ -1526,7 +1526,7 @@ public class Person implements HttpSessionActivationListener, Serlizable{
 
 - 邮件发送过程
 
-  ![](C:\Users\admin\Desktop\笔记\image\mailSendProcess.png)
+  ![](../images/mailSendProcess.png)
 
 - 通过程序自动发送邮件
 
@@ -1622,7 +1622,7 @@ public class MyFilter implements Filter{
 
 - 类加载器运行过程
 
-  ![](C:\Users\admin\Desktop\笔记\image\类加载器.png)
+  ![](../images/类加载器.png)
 
 - 类加载器分类
 
