@@ -56,7 +56,7 @@
   >
   > 聚合函数: sum(), avg(), count(), max(), min()
   >
-  > ​	1.聚合函数不能嵌套	2.聚合函数不能用于条件查询
+  > 	1.聚合函数不能嵌套	2.聚合函数不能用于条件查询
   >
   > 排序: order by 	desc asc
   >
@@ -68,25 +68,25 @@
 
   > 交叉连接查询 笛卡尔积
   >
-  > ​	select * from table1_name,table2_name;
+  > 	select * from table1_name,table2_name;
   >
   > 内连接查询(显隐区别)
   >
-  > ​	隐式内连接: select * from product p,category c where p.pid=c.cid;
+  > 	隐式内连接: select * from product p,category c where p.pid=c.cid;
   >
-  > ​	显示内连接: select * from product p inner join category c on p.pid=c.cid;
+  > 	显示内连接: select * from product p inner join category c on p.pid=c.cid;
   >
   > 左外连接查询（将左表中的数据全查询）
   >
-  > ​	select * from prduct p left outer join category c on p.pid=c.cid;
+  > 	select * from prduct p left outer join category c on p.pid=c.cid;
   >
   > 右外连接查询（将右表中的所有数据均查询）
   >
-  > ​	select * from product p right outer join category c on p.pid=c.cid;
+  > 	select * from product p right outer join category c on p.pid=c.cid;
   >
   > 分页查询
   >
-  > ​	select * from table_name limit limit_index,limit_number;
+  > 	select * from table_name limit limit_index,limit_number;
   >
   > 子查询	将一个查询的结果做为另一个查询的条件
 
@@ -118,7 +118,7 @@
 
 > 注册驱动	DriverManager.registerDriver(new com.mysql.jdbc.Driver);
 >
-> ​			Class.forName("com.mysql.jdbc.Driver");
+> 			Class.forName("com.mysql.jdbc.Driver");
 >
 > 建立连接	Connection conn = DriverManager.getConnecttion("jdbc:mysql://localhost/database","user","passroot");
 >
@@ -126,7 +126,7 @@
 >
 > 执行Sql	ResultSet rs = st.excuteQuery(sql);
 >
-> ​		      int result = st.excuteUpdate(sql);
+> 		      int result = st.excuteUpdate(sql);
 >
 > 遍历结果集
 >
@@ -154,11 +154,11 @@
 >
 > 使用PrepareStatement可以解决此问题，它先根据SQL生成对象，在将传入的参数代替？，不会将参数的关键字作为SQL关键字
 >
-> ​	PrepareStatement ps = conn.preopareStatement(sql);
+> 	PrepareStatement ps = conn.preopareStatement(sql);
 >
-> ​	ps.setString(1,arg)...;
+> 	ps.setString(1,arg)...;
 >
-> ​	ps.excuteQurey();
+> 	ps.excuteQurey();
 
 ### 连接池技术
 
@@ -289,11 +289,7 @@
 
 ##### tomcat目录结构
 
-
-
 ![](../images/tomcat.jpg)
-
-
 
 ##### tomcat 启动异常
 
@@ -303,7 +299,7 @@
 >
 >    处理方式：a. 通过 netstat -aov 命令查看活动链接获得占用端口的 PID ，杀死此 PID 进程即可
 >
->    ​		   b. 修改 tomcat 配置端口 
+>    		   b. 修改 tomcat 配置端口 
 
 ##### Web 应用目录结构
 
@@ -363,7 +359,7 @@
 
   > init(ServletConfig config)
   >
-  > ​	ServletConfig 对象：getServletName()  getServletContext()
+  > 	ServletConfig 对象：getServletName()  getServletContext()
   >
   > service(ServletRequest req, ServletResponse rep)
   >
@@ -439,11 +435,11 @@
 
     > 域对象的通用方法
     >
-    > ​	setAttribute(String key, Object value);
+    > 	setAttribute(String key, Object value);
     >
-    > ​	getAttributr(String key);
+    > 	getAttributr(String key);
     >
-    > ​	removeAttribute(String key);
+    > 	removeAttribute(String key);
 
 ### Response
 
@@ -636,9 +632,9 @@
 - ServletContext 与 Request 域对象比较
   > 生命周期：
   >
-  > ​	ServletContext: 服务器启动创建，服务器关闭销毁，存在于整个 web 应用中
+  > 	ServletContext: 服务器启动创建，服务器关闭销毁，存在于整个 web 应用中
   >
-  > ​	Request: 每次访问时创建，响应结束时销毁，存在于一次请求中
+  > 	Request: 每次访问时创建，响应结束时销毁，存在于一次请求中
 
 - 转发与重定向区别
 
@@ -724,7 +720,7 @@
 
     > cookie.setMaxAge(int seconds);	//cookie 中会产生一个 expires 值代表失效时间
 
-    ​    不设置持久化时间，cookie 会存储在浏览器的内存中，浏览器关闭 cookie 的信息被销毁（会话级别的 cookie ），设置持久化时间，cookie 会被持久化到浏览器的磁盘文件中
+        不设置持久化时间，cookie 会存储在浏览器的内存中，浏览器关闭 cookie 的信息被销毁（会话级别的 cookie ），设置持久化时间，cookie 会被持久化到浏览器的磁盘文件中
 
   - 设置 cookie 的携带路径
 
@@ -734,7 +730,7 @@
     cookie.setPath("/");	//访问此服务器下的所有资源都带着这个cookie
     ```
 
-    ​    不设置携带路径，cookie 信息会在访问产生该 cookie 的 web 资源所在的路径都携带 cookie 信息。（该资源的外部地址）
+        不设置携带路径，cookie 信息会在访问产生该 cookie 的 web 资源所在的路径都携带 cookie 信息。（该资源的外部地址）
 
   - 删除 cookie
 
@@ -777,7 +773,7 @@
 
 ##### Session
 
-​	Session 技术是基于 cookie 的，cookie 会存储 session 编号 JSESSIONID。发送 session 编号和根据编号寻找 session 值是客户端与服务器自动完成的，无需编码。
+    Session 技术是基于 cookie 的，cookie 会存储 session 编号 JSESSIONID。发送 session 编号和根据编号寻找 session 值是客户端与服务器自动完成的，无需编码。
 
 - 创建一个 session 区域
 
@@ -854,9 +850,9 @@
 
 ##### Jsp 运行原理
 
-​	Jsp 在访问时会被 Web 容器翻译为 Servlet 再执行，被翻译后后的 Servlet 存放在 tomcat 的 work 目录下。
+    Jsp 在访问时会被 Web 容器翻译为 Servlet 再执行，被翻译后后的 Servlet 存放在 tomcat 的 work 目录下。
 
-​	过程：访问---->\*.jsp---->\*_jsp.java(servlet)---->编译执行【此过程由 JspServlet 执行，全局 web.xml 已配置】
+    过程：访问---->\*.jsp---->\*_jsp.java(servlet)---->编译执行【此过程由 JspServlet 执行，全局 web.xml 已配置】
 
 ##### Jsp 指令
 
@@ -872,9 +868,9 @@
   >
   > <error-page>
   >
-  > ​	<error-code>404</error-code>
+  > 	<error-code>404</error-code>
   >
-  > ​	<location>/error.jsp</location>
+  > 	<location>/error.jsp</location>
   >
   > </errorPage>
   >
@@ -1520,9 +1516,9 @@ public class Person implements HttpSessionActivationListener, Serlizable{
 >
 > 邮件发送的协议：
 >
-> ​	接受邮件的协议：POP3	IMAP
+> 	接受邮件的协议：POP3	IMAP
 >
-> ​	发送邮件的协议：SMTP
+> 	发送邮件的协议：SMTP
 
 - 邮件发送过程
 
@@ -1540,9 +1536,9 @@ public class Person implements HttpSessionActivationListener, Serlizable{
 
 ##### 概述
 
-​	filter 是对客户端访问资源的过滤，符合条件的放行，不符合条件的不放行，并且可以对目标资源访问前后进行逻辑处理。
+    filter 是对客户端访问资源的过滤，符合条件的放行，不符合条件的不放行，并且可以对目标资源访问前后进行逻辑处理。
 
-​	场景：公共代码提取，对 request, response 的方法进行增强，权限设置......
+    场景：公共代码提取，对 request, response 的方法进行增强，权限设置......
 
 ##### 使用步骤
 
@@ -1602,17 +1598,17 @@ public class MyFilter implements Filter{
 >
 > cookie 不能存入中文字符，为了解决这个问题，可在存入之前对数据进行编码，获取时再对数据进行解码
 >
-> ​	URLEecoder.encode(String s, String character);
+> 	URLEecoder.encode(String s, String character);
 >
-> ​	URLDecoder.decode(String s, String character);
+> 	URLDecoder.decode(String s, String character);
 
 ##### 全局乱码问题解决
 
 > 在 filter 中抽取乱码解决代码：
 >
-> ​	response.setContextType("text/html;charset=utf8");
+> 	response.setContextType("text/html;charset=utf8");
 >
-> ​	request.setCharacteEncoding("utf8");
+> 	request.setCharacteEncoding("utf8");
 >
 > 以上方式对于 get 提交方式获取的参数乱码问题无法解决，因此可通过装饰者设计模式增强 request 的 getParameter() 方法来解决 get 提交方式的乱码问题，HttpServletRequestWrapper 类对 request 接口的方法提供了实现，适用于对 request 的方法进行增强
 
@@ -1646,11 +1642,11 @@ public class MyFilter implements Filter{
 
 ### 注解
 
-​	注解是符合一定格式的语法，并具有一定的功能(@xxx)，主要作用是代替配置文件
+    注解是符合一定格式的语法，并具有一定的功能(@xxx)，主要作用是代替配置文件
 
-​	优点：开发效率高，成本低
+    优点：开发效率高，成本低
 
-​	缺点：耦合性大，不利于后期维护
+    缺点：耦合性大，不利于后期维护
 
 ##### jdk5 提供的注解
 

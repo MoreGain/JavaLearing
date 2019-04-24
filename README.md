@@ -10,7 +10,7 @@
 
 ### Java web
 
-- [SE](notes/Javaweb.md)
+- [Web](notes/Javaweb.md)
 
 ### web 前端
 
