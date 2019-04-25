@@ -28,8 +28,8 @@
 
 ### 框架
 
-- [HIBERNATE](../notes/HIBERNATE.md)
+- [HIBERNATE](notes/HIBERNATE.md)
 
 ### 工具
 
-- [Git](../notes/Git.md)
+- [Git](notes/Git.md)
