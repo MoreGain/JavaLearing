@@ -56,7 +56,7 @@ create table user{
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <hibernate-mapping package="com.project.domain">
-	<class name="User" table="user">
+    <class name="User" table="user">
     	<id name="id" column="id">
             <generator class="native"></generator>
         </id>
@@ -73,14 +73,15 @@ create table user{
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <hibernate-configuration>
-	<session-factory>
+    <session-factory>
         <!-- 必要配置信息5个 -->
     	<propertory name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</propertory>
         ...
         <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
-        <!-- 可选属相3个 -->
+        <!-- 可选属性3个 -->
         <property name="hibernate.show_sql">true</property>
         <property name="hibernate.format_sql">true</property>
+        <!-- create-drop create update validate -->
         <property name="hibernate.hbm2ddl.auto">update</proprerty>
         <!-- 加载映射 -->
         <mapping resource="com/project/domain/user.hbm.xml"/>
@@ -98,7 +99,7 @@ public class TestHbm {
         //创建配置对象
         Configuration cf = new Configuration();
         //加载配置文件
-        cf.config();
+        cf.configure();
         //创建session工厂对象
         SessionFactory sf = cf.buildSessionFactory();
         //开启Session
@@ -115,7 +116,10 @@ public class TestHbm {
         //session.update();
         //session.delete();
         //session.get();
+        //提交事务
         tx.commit();
+        //关闭 session
+        session.close();
     }
 }
 ```
@@ -134,7 +138,7 @@ table 属性：表明
 
 catalog 属性：数据库名，一般省略
 
-###### id 标签：建立类属性与表主键的对应
+###### id 标签：建立类属性与表主键的关联
 
 name：类属性名
 
@@ -142,9 +146,9 @@ column：表字段名
 
 length：字段长度
 
-type：字段类型。Java 类型，Hibernate 类型，SQL 类型
+type：字段类型	Java 类型，Hibernate 类型，SQL 类型
 
-###### property 标签：建立普通属性与表字段的对应
+###### property 标签：建立普通属性与表字段的关联
 
 ##### 核心配置
 
@@ -158,9 +162,7 @@ type：字段类型。Java 类型，Hibernate 类型，SQL 类型
 
 ###### Configuration
 
-用于加载 Hibernate 核心配置文件，对象映射文件
-
-此对象只存在于系统初始化阶段，将 SessionFactory 创建完成后，不再使用
+用于加载 Hibernate 核心配置文件，对象映射文件，此对象只存在于系统初始化阶段，将 SessionFactory 创建完成后，不再使用
 
 ###### SessionFactory
 
@@ -172,21 +174,19 @@ SessionFactory 特点：
 >
 > 不能随意创建和销毁它的实例
 
-一个项目中一般只需要一个 SessionFactory，可通过抽取工具类使用静态块初始化来获得 Session
+一个项目中一般只需要一个 SessionFactory，可通过抽取工具类使用静态块初始化来获得它
 
 ###### Session
 
-Session 是应用程序和数据库交互的单线程对象，提供数据库的增删改查，它不是线程安全的
+Session 是应用程序和数据库交互的单线程对象（好比 Hibernate 与 database 的会话），提供数据库的增删改查，它不是线程安全的
 
 > save()、update()、saveOrUpdate(): 增加修改对象
 >
 > delete(): 删除对象
 >
-> get()、load(): 根据主键查询
+> get()、load(): 根据主键查询(OID)
 >
-> createQuery()、createSQLQuery(): 数据库操作对象
->
-> createCriteria(): 条件查询
+> createQuery()、createCriteria()、createSQLQuery(): 数据库操作对象(HQL、QBC、SQL)
 
 ###### Transaction
 
@@ -294,7 +294,11 @@ Atomic、Consistency、Isolation、Durability
 
 ##### 并发问题
 
-脏读、不可重复读、虚读（幻读）
+脏读：读取到其他事务未提交的数据
+
+不可重复读：事务执行中，其它事务更新了数据，导致两次读取的数据不一致
+
+虚读（幻读）：事务执行中，其它事务插入了数据，导致两次读取数据总数不一致
 
 ##### 隔离级别
 
@@ -320,7 +324,7 @@ hibernate可通过配置文件设置事务隔离级别
 ```xml
 <session-factory>
     <!-- 隔离级别 1248 -->
-	<property name="hibernate.connection.isolation">4</property>
+    <property name="hibernate.connection.isolation">4</property>
 </session-factory>
 ```
 
@@ -332,9 +336,9 @@ Hibernate 提供了三种管理 session 对象的方法，可在配置文件中�
 <!-- session 对象的生命周期与本地线程绑定 -->
 <property name="hibernate.current_session_context_class">thread</property>
 <!-- session 对象的生命周期与 JTA 事务绑定 -->
-<property name="hibernate.current_session_context_class">thread</property>
+<property name="hibernate.current_session_context_class">jta</property>
 <!-- Hibernate 委托程序管理 session 对象的生命周期 -->
-<property name="hibernate.current_session_context_class">thread</property>
+<property name="hibernate.current_session_context_class">managed</property>
 
 ```
 
@@ -404,14 +408,14 @@ List<Customer> list = sqlQuery.list();
 
 ```sql
 create table catagory(
-	c_id int  not null primary key auto_increment,
+    c_id int  not null primary key auto_increment,
     c_name varchar(255) not null
 );
 ```
 
 ```sql
 create table product(
-	p_id int not null primary key auto_increment,
+    p_id int not null primary key auto_increment,
     p_name varchar(255) not null,
     p_c_id int,
     foreign key(p_c_id) references catagory(c_id)
@@ -449,12 +453,12 @@ Catagory.hbm.xml
 <hibernate-mapping package="com.project.domain">
 	<class name="Catagory" table="catagory">
     	<id name="c_id" column="c_id">
-        	<generator class="identity"></generator>
+            <generator class="identity"></generator>
         </id>
         <property name="c_name" column="c_name"/>
         <set name="products">
             <!-- 对应的外键 -->
-        	<key column="p_c_id"></key>
+            <key column="p_c_id"></key>
             <one-to-many class="com.project.domain.Product"/>
         </set>
     </class>
@@ -468,7 +472,7 @@ Product.hbm.xml
 <hibernate-mapping package="com.project.domain">
 	<class name="Product" table="product">
     	<id name="p_id" column="p_id">
-        	<generator class="identity"></generator>
+            <generator class="identity"></generator>
         </id>
         <property name="p_name" column="p_name"/>
         <many-to-one name="catagory" column="p_c_id" class="com.project.domain.Catagory"/>
@@ -542,7 +546,7 @@ public void save() {
 ```xml
 <!-- inverse 默认值为 false，表示默认要维护关系 -->
 <set name="products" inverse="true">
-	<key column="p_c_id"></key>
+    <key column="p_c_id"></key>
     <one-to-many  class="com.project.domain.Product"/>
 </set>
 ```
@@ -563,7 +567,7 @@ Student.hbm.xml
 
 ```xml
 <set name="teachers" table="middleTable">
-	<key column="s_id"></key>
+    <key column="s_id"></key>
     <many-to-many class="com.project.domain.Teacher" column="t_id">
 </set>
 ```
@@ -572,7 +576,7 @@ Teacher.hbm.xml
 
 ```xml
 <set name="students" table="middleTable">
-	<key column="t_id"></key>
+    <key column="t_id"></key>
     <many-to-many class="com.project.domain.Student" column="s_id">
 </set>
 ```
@@ -883,17 +887,31 @@ lazy 默认值为 true ，即使用延迟加载，通过设置值为 false 可�
 
 > set 标签 lazy 取值：true ，默认值，采用延迟加载；false ，不采用延迟加载；extra ，及其懒惰的加载
 >
-> many-to-one 标签取值：proxy ，默认值，是否延迟加载取决与一的一方 class 标签的 lazy 属性；false ，不采用延迟加载；no-proxy ，；
+> many-to-one 标签 lazy 取值：proxy ，默认值，是否延迟加载取决与一的一方 class 标签的 lazy 属性；false ，不采用延迟加载；no-proxy ，；
 
 抓取策略指查询到某个对象时，如何抓取其关联对象，通过在 set  或 many-to-one 标签配置 fetch 属性完成
 
 > set 标签 fetch取值：select ，默认值，发送普通的 select 语句查询；join，发送迫切左外连接语句查询；subselect，发送子查询语句查询关联对象
 >
-> many-to-one 标签取值：select，默认值，发送普通的 select 语句查询；join，发送迫切左外连接语句查询
+> many-to-one 标签 fetch 取值：select，默认值，发送普通的 select 语句查询；join，发送迫切左外连接语句查询
 
-```xml
-<set name="products" fetch="select" lazy="true"></set>
-<set name="products" fetch="select" lazy="false"></set>
-<set name="products" fetch="select" lazy="extra"></set>
-```
+###### set 标签上使用 fetch 和 lazy 
+
+`fetch=select lazy=true` 使用 select 查询出所需对象，使用到它的关联对象时再执行一条 select 语句查询关联对象
+
+`fetch=select lazy=true` 直接使用两条 select 语句查询出所需对象以及它的关联对象
+
+`fetch=select lazy=extra` 使用 select 查询出所需对象，使用到它的关联对象时再执行一条 select 语句查询关联对象，如果只需知道关联对象的总数据量，会使用聚合函数只查询出关联对象的总数据量
+
+`fetch=join` 不论 lazy 如何取值，延迟加载失效
+
+`fetch=subselect` 不论 lazy 如何取值，延迟加载失效
+
+###### many-to-one 标签上使用 fetch 和 lazy
+
+`fetch=select lazy=proxy` 当一的一方使用了类延迟加载策略时，使用 select 查询出所需对象，使用到它的关联对象时再执行一条 select 语句查询关联对象
+
+`fetch=select lazy=flase` 直接使用两条 select 语句查询出所需对象以及它的关联对象
+
+`fetch=join` 不论 lazy 如何取值，延迟加载失效
 
