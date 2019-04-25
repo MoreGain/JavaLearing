@@ -213,11 +213,11 @@ HTTP 协议中可能存在信息窃听或身份伪装等安全问题，使用 HT
 
 - BASIC 认证
 
-  ![](../images/BASIC 认证.jpg)
+  ![](../images/BASIC.jpg)
 
 - DIGEST 认证
 
-  ![](../images/DIGEST 认证.jpg)
+  ![](../images/DIGEST.jpg)
 
 - SSL 客户端认证
 
@@ -228,3 +228,4 @@ HTTP 协议中可能存在信息窃听或身份伪装等安全问题，使用 HT
 #### 构建 Web 内容的技术
 
 #### Web 的攻击技术
+
