@@ -73,7 +73,7 @@
   > 内连接查询(显隐区别)
   >
   > 	隐式内连接: select * from product p,category c where p.pid=c.cid;
-  >
+  >	
   > 	显示内连接: select * from product p inner join category c on p.pid=c.cid;
   >
   > 左外连接查询（将左表中的数据全查询）
@@ -155,9 +155,9 @@
 > 使用PrepareStatement可以解决此问题，它先根据SQL生成对象，在将传入的参数代替？，不会将参数的关键字作为SQL关键字
 >
 > 	PrepareStatement ps = conn.preopareStatement(sql);
->
+>	
 > 	ps.setString(1,arg)...;
->
+>	
 > 	ps.excuteQurey();
 
 ### 连接池技术
@@ -436,9 +436,9 @@
     > 域对象的通用方法
     >
     > 	setAttribute(String key, Object value);
-    >
+    >	
     > 	getAttributr(String key);
-    >
+    >	
     > 	removeAttribute(String key);
 
 ### Response
@@ -633,7 +633,7 @@
   > 生命周期：
   >
   > 	ServletContext: 服务器启动创建，服务器关闭销毁，存在于整个 web 应用中
-  >
+  >	
   > 	Request: 每次访问时创建，响应结束时销毁，存在于一次请求中
 
 - 转发与重定向区别
@@ -851,7 +851,7 @@
 ##### Jsp 运行原理
 
     Jsp 在访问时会被 Web 容器翻译为 Servlet 再执行，被翻译后后的 Servlet 存放在 tomcat 的 work 目录下。
-
+    
     过程：访问---->\*.jsp---->\*_jsp.java(servlet)---->编译执行【此过程由 JspServlet 执行，全局 web.xml 已配置】
 
 ##### Jsp 指令
@@ -869,7 +869,7 @@
   > <error-page>
   >
   > 	<error-code>404</error-code>
-  >
+  >	
   > 	<location>/error.jsp</location>
   >
   > </errorPage>
@@ -1044,25 +1044,39 @@ ${key}
     </c:forEach>
     ```
 
-##### JavaEE 开发模式
+##### 开发模式
 
 - Web 开发模式----MVC
 
-  > M: Model	模型: JavaBean----封装数据
+  使用 MVC 架构可以更好的组织对象，请求交给控制器(Controller)来完成；业务处理或者数据传递交给模型(Model)；数据的显示交给视图(View)处理
+
+  JavaEE 中的 MVC 架构，MVC 中的 JavaBean ：模型、JavaBean 组件。负责数据，负责业务处理
+
+  > Model—>JavaBean----封装数据
   >
-  > V: View	视图: Jsp----页面显示
+  > View—>Jsp----页面显示
   >
-  > C: Controller	控制器: Servlet----获取数据封装并传递，并指定显示的页面
+  > Controller—>Servlet----获取数据封装并传递，并指定显示的页面
 
 - JavaEE开发模式----三层架构
 
-  实际开发时，通过包的结构体现三层结构。
+  使用三层架构可以将开发的流程进行细分，表示层(UI)处理请求及响应、数据的显示；业务层(BLL)处理业务逻辑；持久层(DAL)负责进行数据的持久化操作。实际开发时，通过包的结构体现三层结构。
+
+  三层架构中的 JavaBean ：域模型层，主要作用是用于三层之间进行数据传递，贯穿三层
 
   > Web 层: 与客户端进行交互
   >
   > Service 层: 复杂业务处理
   >
   > Dao 层: 与数据库进行交互 
+
+三层架构与 MVC 都是架构上的概念，本身没有任何引入的内容，通过这些架构能够更好的组织类。使用三层架构，可以让类结构更加清晰；使用 MVC 可以更好的组织对象，让模块之间能够解耦
+
+MVC 架构适用场景：由于 JavaBean 组件即进行数据传递，又要处理业务逻辑，对于庞大的项目将导致维护困难，所以对于小项目、业务不复杂的项目可选用 MVC 架构
+
+三层架构适用场景：对于业务逻辑复杂、庞大的项目适合适用三层架构，而对于小型、业务逻辑简单的项目将导致分层太多，反而结构变得复杂
+
+MVC 与三层架构的联系：在三层架构中，MVC 属于表示层。JavaBean 组件 = 业务层 + 持久层 + 域模型
 
 ### 事务
 
@@ -1517,7 +1531,7 @@ public class Person implements HttpSessionActivationListener, Serlizable{
 > 邮件发送的协议：
 >
 > 	接受邮件的协议：POP3	IMAP
->
+>	
 > 	发送邮件的协议：SMTP
 
 - 邮件发送过程
@@ -1537,7 +1551,7 @@ public class Person implements HttpSessionActivationListener, Serlizable{
 ##### 概述
 
     filter 是对客户端访问资源的过滤，符合条件的放行，不符合条件的不放行，并且可以对目标资源访问前后进行逻辑处理。
-
+    
     场景：公共代码提取，对 request, response 的方法进行增强，权限设置......
 
 ##### 使用步骤
@@ -1599,7 +1613,7 @@ public class MyFilter implements Filter{
 > cookie 不能存入中文字符，为了解决这个问题，可在存入之前对数据进行编码，获取时再对数据进行解码
 >
 > 	URLEecoder.encode(String s, String character);
->
+>	
 > 	URLDecoder.decode(String s, String character);
 
 ##### 全局乱码问题解决
@@ -1607,7 +1621,7 @@ public class MyFilter implements Filter{
 > 在 filter 中抽取乱码解决代码：
 >
 > 	response.setContextType("text/html;charset=utf8");
->
+>	
 > 	request.setCharacteEncoding("utf8");
 >
 > 以上方式对于 get 提交方式获取的参数乱码问题无法解决，因此可通过装饰者设计模式增强 request 的 getParameter() 方法来解决 get 提交方式的乱码问题，HttpServletRequestWrapper 类对 request 接口的方法提供了实现，适用于对 request 的方法进行增强
@@ -1643,9 +1657,9 @@ public class MyFilter implements Filter{
 ### 注解
 
     注解是符合一定格式的语法，并具有一定的功能(@xxx)，主要作用是代替配置文件
-
+    
     优点：开发效率高，成本低
-
+    
     缺点：耦合性大，不利于后期维护
 
 ##### jdk5 提供的注解
