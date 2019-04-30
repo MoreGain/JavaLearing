@@ -13,6 +13,12 @@ git congif --global user.email "visitor@126.com"
 git init
 ```
 
+删除仓库
+
+```bash
+rm -rf .git
+```
+
 添加文件
 
 ```bash
