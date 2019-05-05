@@ -45,7 +45,9 @@ DBMS(Database Manage System)：数据库管理系统
 创建数据库
 
 ```sql
-CREATE DATABASE database_name;
+-- 字符集：定义 MySQL 存储字符串的方式
+-- 校对规则：定义比较字符串的方式，解决排序和字符分组的问题
+CREATE DATABASE [IF NOT EXISTS] database_name[[DEFAULT] CHARACTER SET character_name] [[DEFAULT] COLLATE collate_name];
 ```
 
 显示数据库
@@ -69,13 +71,13 @@ DROP DATABASE [IF EXISTS] db_name
 其他 show 语句
 
 ```sql
-#显示服务器状态信息
+-- 显示服务器状态信息
 show status;
-#显示建库语句
+-- 显示建库语句
 show create database database_name;
-#显示授权用户的安全权限
+-- 显示授权用户的安全权限
 show grants;
-#显示错误或警告信息
+-- 显示错误或警告信息
 show errors;
 show warnings;
 ```
