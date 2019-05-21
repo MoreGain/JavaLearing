@@ -449,8 +449,17 @@ margin 坍塌是标准流的性质，浮动后坍塌现象消失，浮动元素�
 
 ###### 清除浮动
 
-```css
-div {clear: both;}
+```html
+<div>
+	<p class="float_left"></p>
+    <p class="float_left"></p>
+    <p class="float_left"></p>
+</div>
+<div class="clear_both">
+    <p class="float_left"></p>
+    <p class="float_left"></p>
+    <p class="float_left"></p>
+</div>
 ```
 
 可通过 clear 清除浮动，值可为 left、right、both
@@ -460,12 +469,16 @@ div {clear: both;}
 ###### 隔墙清除浮动
 
 ```html
-<div class="float_left">
-
+<div>
+	<p class="float_left"></p>
+    <p class="float_left"></p>
+    <p class="float_left"></p>
 </div>
 <div class="clear_both"></div>
-<div class="float_left">
-    
+<div>
+    <p class="float_left"></p>
+    <p class="float_left"></p>
+    <p class="float_left"></p>
 </div>
 ```
 

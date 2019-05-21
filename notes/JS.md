@@ -1,4 +1,6 @@
-# Javascript
+# JavaScript
+
+[TOC]
 
 ### Hello World
 

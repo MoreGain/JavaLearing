@@ -271,47 +271,79 @@
 
 ### HTTP & Tomcat
 
-##### HTTP
+#### HTTP
 
-- http请求
+###### 简述：
 
-  > 请求由请求行、请求头、请求体构成
-  >
-  > get 方式提交没有请求体  
+http 协议是一种规范，它规定了各个浏览器和服务器通信的标准，不管什么浏览器，只要是遵循 http 协议，就可以被解析
 
-  ![](../images/http请求.png)
+###### 特点：
 
-- http响应
+> 遵循请求响应模型
+>
+> 无状态协议
+>
+> http 端口是 80（扩展：ftp 端口是 21）
+>
+> http 属于应用层协议
 
-  > 响应由响应行、响应头、响应体构成
+###### http请求
+
+> 请求由请求行、请求头、请求体构成
+>
+> get 方式提交没有请求体  
+
+![](../images/http请求.png)
+
+###### http响应
+
+> 响应由响应行、响应头、响应体构成
 
 ![](../images/http响应.png)
 
-##### tomcat目录结构
+#### tomcat
+
+###### 概述
+
+既是服务器又是容器，tomcat 默认支持 servlet 和 jsp 运行；tomcat 负责创建 servlet 以及对 servlet 里面数据的封装，和 servlet 方法的调用
+
+###### tomcat 对 servlet 提供的支持
+
+通信支持 ：tomcat 会调用 servlet 的 api 方法来进行通信，service 方法 tomcat 默认调用
+
+多线程支持：tomcat 默认实现多线程，每次请求都会默认创建新的线程来处理（servlet 效率比较高）
+
+jsp 支持 ：tomcat 也支持 jsp
+
+生命周期管理：tomcat 负责对 servlet 进行创建和销毁	
+
+安全信息管理：tomcat 具有一些安全验证，保证服务器信息安全，如 web-info
+
+###### tomcat目录结构
 
 ![](../images/tomcat.jpg)
 
-##### tomcat 启动异常
+###### tomcat 启动异常
 
 > 1. JAVA_HOME 未正确配置
 >
 > 2. 端口被占用
 >
->    处理方式：a. 通过 netstat -aov 命令查看活动链接获得占用端口的 PID ，杀死此 PID 进程即可
+> 处理方式：a. 通过 netstat -aov 命令查看活动链接获得占用端口的 PID ，杀死此 PID 进程即可
 >
->    		   b. 修改 tomcat 配置端口 
+> 		   b. 修改 tomcat 配置端口 
 
-##### Web 应用目录结构
+###### Web 应用目录结构
 
 ![](../images/webapp structure.jpg)
 
-##### Eclipse 下配置 tomcat
+###### Eclipse 下配置 tomcat
 
 - 项目发布常见问题
   1. 在 Eclipse 中更改了项目名称后无法访问到项目(web project setting)
   2. 在 tomcat webapps 目录结构中删除项目后无法再部署此项目
 
-##### Intellij 下配置 tomcat
+###### Intellij 下配置 tomcat
 
 > 1. tomcat 构建web项目
 > 2. 配置 tomcat 服务器的方式
@@ -455,6 +487,18 @@
   setStatus(int sc);	//设置状态码
   ```
 
+  常见状态码：
+
+  > 100-199：请求正在进行
+  >
+  > 200-299：请求成功
+  >
+  > 300-399：
+  >
+  > 400-499：请求路径错误，请求资源不存在
+  >
+  > 500-599：服务器端错误
+
 - 设置响应头
 
   > addHeader(String key, String value)	//常用	add 同名头信息多次则值会被多次添加
@@ -485,8 +529,6 @@
   //通过定时刷新重定向(页面定时器 setInterval())
   response.setHeader("refresh","5;b.html");	//5 代表 5s
   ```
-
-  
 
   > 会访问服务器两次
   >
@@ -641,7 +683,7 @@
   > 1. 重定向为两次请求，转发为一次请求
   > 2. 重定向地址变化，转发地址不变
   > 3. 重定向可以访问外部网站，转发只能访问内部资源
-  > 4. 转发的性能由于重定向
+  > 4. 转发的性能优于重定向
 
 - 客户端地址与服务器地址的写法
 
@@ -704,15 +746,18 @@
 
 ##### 会话技术简介
 
+有状态的会话：客户端第一次访问服务器完后，再次访问服务器，服务器能够识别这两次请求是同一个用户的行为，如先登录再访问
+
+无状态的会话：多次访问服务器，每次对服务器来说都是一个新的用户
+
 > 会话技术是用来帮助服务器记住客户端状态的。
 >
 > 从打开浏览器访问某个站点，到关闭整个浏览器的过程称为一次会话。
 >
-> Session 将信息存到服务器，安全性较好，但增加了服务器的压力。
->
-> Cookie 将信息存到客户端，减少了服务器的压力，安全性不好，客户端可以清除 Cookie
 
 ##### Cookie
+
+cookie 是客户端保存会话的技术，程序把每个用户的数据以 cookie 的形式保存在浏览器中，减少了服务器的压力，但安全性不好，客户端可以清除 Cookie，一般不会将重要的信息保存到 cookie
 
 - API
 
@@ -720,7 +765,7 @@
 
     > cookie.setMaxAge(int seconds);	//cookie 中会产生一个 expires 值代表失效时间
 
-        不设置持久化时间，cookie 会存储在浏览器的内存中，浏览器关闭 cookie 的信息被销毁（会话级别的 cookie ），设置持久化时间，cookie 会被持久化到浏览器的磁盘文件中
+        不设置持久化时间，cookie 会存储在浏览器的内存中，浏览器关闭 cookie 的信息被销毁（会话级别的 cookie），设置持久化时间，cookie 会被持久化到浏览器的磁盘文件中
 
   - 设置 cookie 的携带路径
 
@@ -745,8 +790,6 @@
     c.setMaxAge(0);    
     ```
 
-    
-
 - 服务器发送 Cookie 到客户端
 
   ```java
@@ -755,8 +798,6 @@
   //2.发送cookie(以头形式传输	set-cookie: key=vlaue)
   response.addCookie(cookie);
   ```
-
-  
 
 - 服务器从客户端获取 Cookie
 
@@ -773,17 +814,17 @@
 
 ##### Session
 
-    Session 技术是基于 cookie 的，cookie 会存储 session 编号 JSESSIONID。发送 session 编号和根据编号寻找 session 值是客户端与服务器自动完成的，无需编码。
+Session 将信息存到服务器，一个浏览器独占一个 session 对象，可以将一些隐私数据保存到 session 对象中，来达到会话状态管理，安全性较好，但增加了服务器的压力。
+
+    Session 技术是基于 cookie 的，cookie 会存储 session 编号 JSESSIONID，如果客户端禁用 cookie，则 session 无法正常生效；发送 session 编号和根据编号寻找 session 值是客户端与服务器自动完成的，无需编码。
 
 - 创建一个 session 区域
 
   ```java
-  //此方法底层会自动判断当前客户端是否已经存在session，若不存在会自动创建一个session，若存在则返回已存在的session
+  //此方法底层会自动判断当前客户端是否已经存在session，若不存在会自动创建一个session，若存在则返回已存在的session；传入参数值 false 可以只查找存在的 session 而不进行创建
   HttpSession session = request.getSession();
   String id = session.getId();	//返回session的JSESSIONID
   ```
-
-  
 
 - 向 session 存取数据(session 是一个域对象，作用范围为一次会话)
 
@@ -818,7 +859,7 @@
 
   - session 的持久化
 
-    > 将存储JSESSIONID的cookie持久化即可
+    > 将存储 JSESSIONID 的 cookie 持久化即可
 
 - 验证码校验功能实现
 
@@ -827,6 +868,24 @@
   > 获得随机生成的验证码，通过存入 session 域
   >
   > 比较
+
+##### 其他会话技术
+
+**url 重写**
+
+url 第一次访问的时候获取到资源，接下来对 URL 进行编码，再将 URL 发送回客户端，下次访问的时候使用编码过的 URL 访问就能将会话状态保存起来，使用此方式客户端再次访问必须使用编码过的 URL
+
+```java
+HttpSession session = request.getSession();
+//uri 统一资源标识符
+//url 统一资源定位符
+String uri  = request.getRequestURI();
+//对 uri 进行编码
+//uri = uri+";jsessionid"+session.getId();
+uri = encodeURL(uri);
+```
+
+**hidden 隐藏**
 
 ### JSP
 
@@ -852,7 +911,7 @@
 
     Jsp 在访问时会被 Web 容器翻译为 Servlet 再执行，被翻译后后的 Servlet 存放在 tomcat 的 work 目录下。
     
-    过程：访问---->\*.jsp---->\*_jsp.java(servlet)---->编译执行【此过程由 JspServlet 执行，全局 web.xml 已配置】
+    过程：访问---->/*.jsp---->/*_jsp.java(servlet)---->编译执行【此过程由 JspServlet 执行，全局 web.xml 已配置】
 
 ##### Jsp 指令
 
@@ -880,13 +939,13 @@
 
   > 页面包含指令（静态包含），将一个 Jsp 页面包含到另一个 Jsp 页面
   >
-  > <%@ include file="" %>
+  > <%@ include file=" " %>
 
 - taglib 指令
 
   > 在 Jsp 页面引入第三方标签库( jstl 标签库、struts2 标签库)
   >
-  > <%@ taglib uri="" prefix="" %>
+  > <%@ taglib uri=" " prefix=" " %>
 
 - Jsp 内置对象
 
@@ -924,9 +983,9 @@
 
   - out(JspWriter)
 
-    > 向客户端输出内容	out.writer()
+    > 向客户端输出内容	
     >
-    > 输出的内容先写入 out 缓冲区，在刷入 response 缓冲区，数据会显示在 response 缓冲区已有内容之后，response.getWriter().write() 方式写入的数据直接写入 response 缓冲区，可通过设置 page 的 buffer 值为0，让 out 对象的输出内容直接写入 response 缓冲区。
+    > out.writer() 输出的内容先写入 out 缓冲区，在刷入 response 缓冲区，数据会显示在 response 缓冲区已有内容之后，response.getWriter().write() 方式写入的数据直接写入 response 缓冲区，可通过设置 page 的 buffer 值为0，让 out 对象的输出内容直接写入 response 缓冲区。
 
   - page(this)
 
@@ -946,7 +1005,7 @@
 
     > 静态包含：将两个页面翻译到一个 Servlet
     >
-    > 动态包含：翻译为两个 Servlet 页面，包含页面中使用 include 方法(执行到此方法才编译第二个 Jsp 页面)加载另一个页面
+    > 动态包含：翻译为两个 Servlet 页面，包含页面中使用 include 方法(执行到此方法才编译第二个 Jsp 页面)加载另一个页面；当两个页面中具有相同的变量时，此方式不会发生错误，但效率低于静态包含
 
   - 请求转发
 
@@ -1080,7 +1139,7 @@ MVC 与三层架构的联系：在三层架构中，MVC 属于表示层。JavaBe
 
 ### 事务
 
-> 一个事务具有 n 个单元，它们要么同时执行成功，或同时执行失败。
+> 一个事务具有 n 个单元，它们要么同时执行成功，要么同时执行失败。
 
 ##### MySql 事务
 
@@ -1197,23 +1256,23 @@ public static void rollback() throws Exception(){
 
   > 一个事务中，两次读取的数据的数量不一致。要求一个事务中多次读取的数据数量应是一致的(insert/delete)
 
-- 事务的隔离级别
+##### 事务的隔离级别
 
-  > read uncommitted: 读取尚未提交的数据，不能解决并发问题
-  >
-  > read committed: 读取已提交的数据，可解决脏读
-  >
-  > repeatable read: 重读读取，可解决脏读，不可重复读
-  >
-  > serializable: 串行化，可解决所有并发问题，但性能太低，相当于锁表
-  >
-  > 性能从上到下，安全性从下到上
+> read uncommitted: 读取尚未提交的数据，不能解决并发问题
+>
+> read committed: 读取已提交的数据，可解决脏读
+>
+> repeatable read: 重读读取，可解决脏读，不可重复读
+>
+> serializable: 串行化，可解决所有并发问题，但性能太低，相当于锁表
+>
+> 性能从上到下，安全性从下到上
 
-  Oracle 默认隔离级别为 read committed, MySql 默认隔离级别为 repeatable read
+Oracle 默认隔离级别为 read committed, MySql 默认隔离级别为 repeatable read
 
-  > 查看 MySql 默认隔离级别：select @@tx_isolation;
-  >
-  > 设置 MySql 的隔离级别：set session transaction isolation level value;
+> 查看 MySql 默认隔离级别：select @@tx_isolation;
+>
+> 设置 MySql 的隔离级别：set session transaction isolation level value;
 
 ### 商城后台系统
 
@@ -1278,6 +1337,18 @@ public static void rollback() throws Exception(){
   > PageBean 封装需要的散装数据，当前页商品数据，当前页数，总页数，总商品数量等
 
 ### Ajax
+
+##### 概念
+
+前端技术，用于创建交互式网页应用的网页开发技术，是异步的 JavaScript 和 xml
+
+优点：
+
+1. 可以创建快速动态网页
+2. 可以实现不刷新整个网页的情况下，局部更新网页中的内容
+3. 可以和后台服务器进行数据交互，不会把整个页面都给传回来，只接受更改过后的数据，动态的替换页面上原来的数据，分担了服务器的压力
+
+ajax 涉及到 7 项技术，JavaScript、XMLHttpRequest、DOM、XML 最为重要；AJAX 核心对象 XMLHTTPRequest 对象，基本所有的浏览器都支持此对象
 
 ##### 同步异步
 
@@ -1550,9 +1621,11 @@ public class Person implements HttpSessionActivationListener, Serlizable{
 
 ##### 概述
 
-    filter 是对客户端访问资源的过滤，符合条件的放行，不符合条件的不放行，并且可以对目标资源访问前后进行逻辑处理。
-    
-    场景：公共代码提取，对 request, response 的方法进行增强，权限设置......
+filter 是对客户端访问资源的过滤，符合条件的放行，不符合条件的不放行，并且可以对目标资源访问前后进行逻辑处理。
+
+过滤器链：多个过滤器同时作用，称为过滤器链。过滤器链是嵌套执行的，先执行的后退出
+
+场景：公共代码提取，对 request, response 的方法进行增强，权限设置......
 
 ##### 使用步骤
 
@@ -1643,6 +1716,28 @@ public class MyFilter implements Filter{
   > AppClassLoader: 应用类加载器，加载三方 jar 包和自己编写的文件
   >
   > 自定义类加载器
+
+- 加载机制
+
+  全盘负责：当一个类加载器负责加载某个类的时候，这个 class 所依赖的其他 class 也由当前类加载器加载
+
+  父类委托：先让父加载器加载内容，只有父加载器无法加载的时候再尝试自己从类路径加载
+
+  缓存机制：将被加载的类缓存起来，当下次要在加载这个类的时候，直接从缓存区获取就行了，一旦修改了 class ，必须重启 jvm 
+
+- 双亲委派机制
+
+  工作流程：
+
+  当 ApplicationClassLoader 加载一个 class 的时候，首先自己不会尝试加载这个类，而是将加载委托给父亲 extClassLoader
+
+  当 extClassloader 加载 class 的时候，会尝试委托给 BootStrapClassLoader  加载
+
+  如果 BootStrapClassLoader 加载失败，即 jre/lib 下获取不到类信息，再委托给 extClassLoader 加载
+
+  意义：
+
+  防止内存中出现多份同样的字节码，保证 java 程序运行稳定，一个 class 只加载一次
 
 - 获得类加载器
 

@@ -1,5 +1,9 @@
 # SQL(Structure Query Language)
 
+[TOC]
+
+
+
 ##### 基础
 
 数据库(database)：保存有组织的数据的容器
@@ -40,7 +44,9 @@ DBMS(Database Manage System)：数据库管理系统
 
 连接DBMS
 
+> ```sql
 > mysql -u -p
+> ```
 
 创建数据库
 
@@ -226,7 +232,7 @@ SELECT column FROM table_name;
 SELECT column1,column2,column3 FROM tale_name;
 ```
 
-检索所有类
+检索所有列
 
 ```sql
 SELECT * FROM table_name;
@@ -235,7 +241,7 @@ SELECT * FROM table_name;
 检索去重
 
 ```sql
-#cloumn 中重复的行将被去掉
+-- cloumn 中重复的行将被去掉
 SELECT DISTINCT column FROM table_name;
 ```
 
@@ -244,7 +250,7 @@ SELECT DISTINCT column FROM table_name;
 检索限制结果（返回固定行的数据，如：分页）
 
 ```sql
-# a 表示起始位值(从0开始)，b 表示显示的行数
+-- a 表示起始位值(从0开始)，b 表示显示的行数
 SELECT column FROM table_name LIMIT a,b;
 ```
 
@@ -317,7 +323,7 @@ WHERE 子句操作符
 1. 空值检查 (IS NULL)
 
 ```sql
-# NULL 与0、空字符串、空格不同
+-- NULL 与0、空字符串、空格不同
 SELECT column FROM table_name WHERE column IS NULL
 ```
 
@@ -326,9 +332,9 @@ SELECT column FROM table_name WHERE column IS NULL
 2. 组合 WHERE 子句 (AND OR)
 
 ```sql
-# AND 检索满足所有给条件的行
+-- AND 检索满足所有给条件的行
 SELECT name FROM user WHERE id>10 AND age<18;
-# OR 检索满足任一条件的行
+-- OR 检索满足任一条件的行
 SELECT name FROM user WHERE id>10 OR age<18;
 ```
 
@@ -341,7 +347,7 @@ SELECT name FROM user WHERE id>10 OR age<18;
 > NOT IN 表示每个条件都不匹配
 
 ```sql
-# 返回 user 表中 id （不）为 1,2,3 的用户名字
+-- 返回 user 表中 id （不）为 1,2,3 的用户名字
 SELECT name FROM user WHERE id (NOT) IN (1,2,3);
 ```
 
@@ -380,9 +386,9 @@ SELECT name FROM user WHERE id (NOT) IN (1,2,3);
 5. 正则表达式进行搜索
 
 ```sql
-# 基本匹配(检索包含 1000 的所有行)
+-- 基本匹配(检索包含 1000 的所有行)
 SELECT column FROM table_name WHERE column REGEXP '1000';
-# 区分大小写
+-- 区分大小写
 SELECT column FROM table_name WHERE column REGEXP BINARY '1000';
 ```
 
@@ -397,10 +403,10 @@ SELECT column FROM table_name WHERE column REGEXP BINARY '1000';
 ```sql
 SELECT Concat(column1,"(",column2,")") FROM table_name;
 
-# 去除值左右两边空格， RTime() 去除右空格， LTrim() 去除左空格
+-- 去除值左右两边空格， RTime() 去除右空格， LTrim() 去除左空格
 SELECT Concat(Trim(column),"(",Trim(column2),")") FROM table_name;
 
-# 使用别名
+-- 使用别名
 SELECT column AS costom_name FROM table_name;
 ```
 
@@ -409,7 +415,7 @@ SELECT column AS costom_name FROM table_name;
 > 可通过算术运算符(+ - * /)对查询结果进行计算
 
 ```sql
-SELECT column1*column2 AS costom_name FROM table_name;
+SELECT column1*column2 AS show_column_name FROM table_name;
 ```
 
 ##### 函数
@@ -630,6 +636,101 @@ ORDER BY column
 >
 > ​	列数据类型必须兼容
 
+
+
+##### 索引
+
+索引是一种特殊的文件，它们包含着对数据库表里所有记录的指针引用，能够加快数据库的查询速度，简单说就是为了提高表的搜索效率而对某些字段中的值建立的目录
+
+索引分类：普通索引、唯一索引、主键索引、全文索引
+
+创建单列索引
+
+```sql
+CREATE index index_name on table_name(column_name)
+-- 通过修改表结构创建索引
+ALTER TABLE table_name ADD index index_name(column_name)
+-- 创建表时创建索引
+CREATE TABLE table_name(
+	id int PRIMARY KEY,
+    name varchar(20),
+    index index_name(column_name)
+)
+```
+
+创建多列索引
+
+```sql
+-- 使用多列索引需要满足最左前缀列
+CREATE index index_name on table_name(column_name,column_name...)
+-- 适用场景：
+-- 匹配全值，对索引中所有列都指定具体的值
+-- 匹配最左前缀
+-- 匹配部分左前缀
+-- 匹配第一列范围查询（只能使 like a%）
+```
+
+查看索引
+
+```sql
+SHOW index FROM table_name
+```
+
+删除索引
+
+```sql
+-- 修改表结构删除
+ALTER TABLE table_name DROP index index_name
+```
+
+创建唯一索引
+
+```sql
+-- 索引列的值必须唯一，可以有空值，组合索引列值的组合必须唯一
+CREATE UNIQUE index index_name on table_name(column_name)
+ALTER TABLE  table_name ADD UNIQUE index(column_name)
+-- 创建表的时候添加索引（unique 字段会被默认创建唯一索引）
+CREATE TABLE table_name (
+	...
+    UNIQUE index index_name (column_name)
+)
+```
+
+创建主键索引
+
+```sql
+-- 主键索引是特殊的唯一索引，不允许有空值，为表定义主键将自动创建主键索引
+ALTER TABLE table_name ADD PRIMARY KEY(column_name)
+CREATE TABLE table_name (
+	id int PRIMARY KEY,
+    ...
+)
+```
+
+创建全文索引
+
+```sql
+-- 全文索引仅适用于 MyISAM 引擎的表
+CREATE fulltext index index_name on table_name(column_name)
+ALTER TABLE table_name ADD fulltext index_name(column_name)
+CREATE TABLE table_name (
+	...
+    fulltext index_name(column_name)
+)
+```
+
+使用全文索引
+
+```sql
+-- 全文搜索中，mysql 指定了最小字符长度，默认为4，即必须陪匹配大于4才会有返回结果
+-- 可通过 show variables like 'ft_min_word_len' 来查看指定的字符长度
+-- 可在 mysql 配置文件 my.ini 更改最小字符长度，增加一行例如：ft_min_word_len=2
+-- mysql 还会计算一值的权值决定是否出现在结果集中，mysql 不支持中文的全文索引
+SELECT * FROM table_name WHERE match(column,column,...) against("serach_value")
+```
+
+
+
 ##### 全文本搜索
 
 > MySql 中 MyISAM 引擎支持全文本搜索，InnoDB 不支持
@@ -643,7 +744,7 @@ ORDER BY column
 使用 Match() 和 Against() 进行全文本搜索
 
 ```sql
-# Match 指定列进行搜索，它的值必须与FULLTEXT中定义的相同，Against 指定要搜索的文本
+-- Match 指定列进行搜索，它的值必须与FULLTEXT中定义的相同，Against 指定要搜索的文本
 SELECT column FROM table_name WHERE Match(column) Against('heavy')
 ```
 
@@ -700,6 +801,7 @@ SELECT column FROM table_name WHERE Match(column) Against('heavy -rope*' IN BOOL
 	</tr>
 </table>
 
+
 ##### 插入数据
 
 插入一行数据所有列值
@@ -734,6 +836,8 @@ INSERT LOW_PRIORITY INTO ...
 INSERT INTO table_name(c1,c2...) SELECT c1,c2... FROM table_name 
 ```
 
+
+
 ##### 更新和删除数据
 
 更新特定行一列数据
@@ -751,7 +855,7 @@ UPDATE table_name SET column1=newValue,column2=newValue WHERE condition;
 更新所有行
 
 ```sql
-# 注意不要省略 WHERE，不使用 WHERE 过滤条件进行更新将更新所有行
+-- 注意不要省略 WHERE，不使用 WHERE 过滤条件进行更新将更新所有行
 UPDATE table_name SET column=newValue;
 ```
 
@@ -776,9 +880,9 @@ DELETE FROM table_name WHERE condition;
 删除所有行（删除行，不删除表本身）
 
 ```sql
-# 注意不要省略 WHERE，不使用 WHERE 过滤条件进行删除将更新所有行
+-- 注意不要省略 WHERE，不使用 WHERE 过滤条件进行删除将更新所有行
 DELETE FROM table_name;
-# 更快的删除（删除原来的表并重建表）
+-- 更快的删除（删除原来的表并重建表）
 TRUNCATE table table_name;
 ```
 
@@ -816,6 +920,8 @@ CREATE OR REPALCE VIEW view_name;
 >
 > 视图通常用于检索，而不用于更新
 
+
+
 ##### 存储过程
 
 简单的说，存储过程是为以后的使用而保存的一条或多条 MySQL 语句的集合
@@ -832,33 +938,33 @@ MySQL 将编写存储过程的安全和访问与执行存储过程的安全与�
 - 执行存储过程
 
 ```sql
-# 执行名为 pricepricing 的存储过程，返回产品的最低、最高、平均价格
-# pricelow 等为变量，它们是内存中一个特定的位置，用来临时存储数据
+-- 执行名为 pricepricing 的存储过程，返回产品的最低、最高、平均价格
+-- pricelow 等为变量，它们是内存中一个特定的位置，用来临时存储数据
 CALL productpricing(@pricelow,@pricehigh,@priceaverage);
-# 显示结果
+-- 显示结果
 SELECT @pricelow,@pricehigh,@priceaverage;
 ```
 
 - 创建存储过程
 
 ```sql
-# 更改 MySQL 命令行实用程序使用 // 作为分隔符，以便解释存储过程
+-- 更改 MySQL 命令行实用程序使用 // 作为分隔符，以便解释存储过程
 DELIMITER //
 
-# () 内为存储过程接收的参数，BEGIN AND 用于限制存储过程体
+-- () 内为存储过程接收的参数，BEGIN AND 用于限制存储过程体
 CREATE PROCEDURE productpricing()
 BEGIN
 	SELECT Avg(prod_price) AS priceaverage FROM products;
 END //
 
-# 恢复初始分隔符 
+-- 恢复初始分隔符 
 DELIMITER ;
 ```
 
 - 删除存储过程
 
 ```sql
-# 只需给出存储过程名，不需要 ()
+-- 只需给出存储过程名，不需要 ()
 DROP PROCEDURE productpricing;
 ```
 
@@ -889,6 +995,29 @@ END //
 ```
 
 > 可通过 IN、OUT、INOUT 给存储过程传递参数和从存储过程传出结果
+
+- 变量定义与赋值
+
+  [mysql 变量](https://www.cnblogs.com/Brambling/p/9259375.html)
+
+```sql
+CREATE PROCEDURE test()
+BEGIN
+	-- 局部变量：只能在声明的存储过程内部使用
+	-- 全局变量：
+	-- 用户变量：
+	-- 会话变量：
+	
+	-- 变量定义
+	DECLARE number1 int DEFAULT 0;
+	DECLARE number2 int;
+	-- 变量赋值
+	set number1=10;
+	set number2:=20; -- 推荐使用，因为赋值与判断均使用的是 =
+	-- dual 表示伪表，是 mysql 提供的默认表
+	SELECT 	number1,number2 [from dual];
+END
+```
 
 - 智能存储过程
 
@@ -935,6 +1064,8 @@ END //
 SHOW CREATE PROCEDURE ordertotal;
 -- 查看存储过程状态
 SHOW PROCEDURE STATUS LIKE 'ordertotal';
+-- 查询数据库的存储过程
+SHOW PROCEDURE STATUS WHERE DB='shop';
 ```
 
 
@@ -1041,6 +1172,8 @@ BEGIN
 	CLOSE ordernumbers;
 END //
 ```
+
+
 
 ##### 触发器
 
@@ -1154,6 +1287,8 @@ RELEASE delete1;
 -- 指示 MySQL 不自动提交更改
 SET autocommit=0;
 ```
+
+
 
 ##### 全球化和本地化
 
