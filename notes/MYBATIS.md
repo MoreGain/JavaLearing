@@ -28,6 +28,8 @@ MyBatis 是一个持久层框架，对 jdbc 的操作数据库的过程进行了
 
 ![MyBatis 架构](../images/MYBATIS 架构.PNG)
 
+Executor 具有 BaseExecutor 和 CacheExecutor 两个实现类
+
 ### 入门程序
 
 ##### 环境搭建
@@ -65,6 +67,7 @@ PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
 <configuration>
 	<!-- 和spring整合后 environments配置将废除 -->
 	<environments default="development">
+        <!-- 运行环境，包含数据源和事务管理器 -->
 		<environment id="development">
 			<!-- 使用jdbc事务管理 -->
 			<transactionManager type="JDBC" />
@@ -229,6 +232,38 @@ Mapper接口开发需要遵循以下规范：
     </mappers>
 
 </configuration>
+```
+
+### 延迟加载
+
+延迟加载其实就是将数据加载时机推迟，将采用高级映射实现多表联查时向数据库发出的 SQL 语句拆分成若干条单表查询的 SQL 语句，当需要返回数据时才会向数据库发出只针对当前数据的 SQL 语句
+
+先从单表查询、需要时再从关联表去关联查询，提升数据库性能，因为查询单表要比关联查询多张表速度要快，内存资源占用更少
+
+###### 延迟加载 setting 参数配置
+
+```xml
+<configuration>
+    <settings>
+        <!-- true:开启懒加载，所有关联对象都会延迟加载，默认为false -->
+    	<setting name="lazyLoadingEnabled" value="true" />
+        <!-- 侵入式加载，任何方法的调用都会加载该对象的所有属性，否则每个对象按需加载 -->
+        <setting name="aggressiveLazyLoading" value="false" />
+        <!-- 指定哪个对象的方法触发一次延迟加载 -->
+        <setting name="lazyLoadTriggerMethods" value="equals,clone,hashCode,toString"/>
+    </settings>
+</configuration>
+```
+
+###### 延迟加载映射文件配置
+
+```xml
+<mapper>
+    <resultMap id="" type="">
+        <association property="" javaType="" select="" column="" fetchType=""/>
+        <collection property="" ofType="" select="" column=""/>
+    </resultMap>
+</mapper>
 ```
 
 ### 输入映射和输出映射
