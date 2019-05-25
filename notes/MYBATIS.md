@@ -29,7 +29,7 @@ MyBatis 是一个持久层框架，对 jdbc 的操作数据库的过程进行了
 
 ### MyBatis 架构
 
-![MyBatis 架构](../images/MYBATIS%20constructure.png)
+![MyBatis 架构](../images/MYBATIS%20constructure.PNG)
 
 Executor 具有 BaseExecutor 和 CacheExecutor 两个实现类
 
