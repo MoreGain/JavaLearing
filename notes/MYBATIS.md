@@ -1,5 +1,8 @@
 # MYBATIS
 
+- [MyBatis 基础]()
+- [源码分析]()
+
 ### 概述
 
 MyBatis 原来是 apache 的一个开源项目 iBatis，2010 年由 apache software foundation 迁移到 Google code，并更名为 MyBatis，2013 年 11 月迁移到 GitHub。
@@ -26,7 +29,7 @@ MyBatis 是一个持久层框架，对 jdbc 的操作数据库的过程进行了
 
 ### MyBatis 架构
 
-![MyBatis 架构](../images/MYBATIS 架构.PNG)
+![MyBatis 架构](../images/MYBATIS constructure.PNG)
 
 Executor 具有 BaseExecutor 和 CacheExecutor 两个实现类
 
@@ -203,7 +206,7 @@ Mapper接口开发需要遵循以下规范：
 ### SqlMapConfig.xml 配置文件
 
 ```xml
-<!--  -->
+<!-- 主配置文件 -->
 <configuration>
     <!-- 可以用来加载外部配置信息，比如引入 MySql 连接配置文件 -->
     <!-- 具体使用时用 el 表达式获取值，如 ${jdbc.username } -->
@@ -234,37 +237,7 @@ Mapper接口开发需要遵循以下规范：
 </configuration>
 ```
 
-### 延迟加载
 
-延迟加载其实就是将数据加载时机推迟，将采用高级映射实现多表联查时向数据库发出的 SQL 语句拆分成若干条单表查询的 SQL 语句，当需要返回数据时才会向数据库发出只针对当前数据的 SQL 语句
-
-先从单表查询、需要时再从关联表去关联查询，提升数据库性能，因为查询单表要比关联查询多张表速度要快，内存资源占用更少
-
-###### 延迟加载 setting 参数配置
-
-```xml
-<configuration>
-    <settings>
-        <!-- true:开启懒加载，所有关联对象都会延迟加载，默认为false -->
-    	<setting name="lazyLoadingEnabled" value="true" />
-        <!-- 侵入式加载，任何方法的调用都会加载该对象的所有属性，否则每个对象按需加载 -->
-        <setting name="aggressiveLazyLoading" value="false" />
-        <!-- 指定哪个对象的方法触发一次延迟加载 -->
-        <setting name="lazyLoadTriggerMethods" value="equals,clone,hashCode,toString"/>
-    </settings>
-</configuration>
-```
-
-###### 延迟加载映射文件配置
-
-```xml
-<mapper>
-    <resultMap id="" type="">
-        <association property="" javaType="" select="" column="" fetchType=""/>
-        <collection property="" ofType="" select="" column=""/>
-    </resultMap>
-</mapper>
-```
 
 ### 输入映射和输出映射
 
@@ -328,14 +301,109 @@ resultType 可以指定将查询结果映射为 pojo，但需要 pojo 的属性�
 </mapper>
 ```
 
-### 动态 SQL
 
-通过 MyBatis 提供的标签方法实现动态拼接 SQL
 
-if 标签
+### 关联关系
+
+###### 一对一
+
+方式一：使用 resultType，定义专门的pojo类作为输出类型，其中定义了sql查询结果集所有的字段
+
+```java
+//例如查询订单并关联查询出订单所属用户信息，定义专用 POJO 类继承订单内，在此类中定义需要的用户字段
+public class OrderUser extends Order {
+    //只需要定义用户信息字段
+    private String username;
+}
+```
+
+方式二：使用 resultMap，配置 resultMap 用于映射一对一查询结果
+
+```java
+//订单类中持有对象应用
+public class Order {
+    //...
+    private User user;
+    //getter setter...
+}
+```
 
 ```xml
-<select id="fingUserByUser" parameterType="user" resultType="user">
+
+<select id="findOrderById" parameter="Integer" resultMap="orderUser">
+	select * from order o join user u on o.id=u.id where id = #{id}
+</select>
+<resultMap type="order" id="orderUser">
+    <!-- 配置订单对象本身的属性，关联关系映射中，必须显示配置所有字段与列的对应关系，即使命名相同 -->
+	<id property="id" column="id" />
+	<result property="orderName" column="orderName" />
+	<result property="number" column="number" />
+
+	<!-- association ：配置一对一属性 -->
+	<!-- property:order里面的User属性名 -->
+	<!-- javaType:关联对象的属性类型，使用全限定类名指定 -->
+	<association property="user" javaType="user">
+		<!-- id:声明主键，表示user_id是关联查询对象的唯一标识-->
+		<id property="id" column="user_id" />
+		<result property="username" column="username" />
+		<result property="address" column="address" />
+	</association>
+</resultMap
+```
+
+###### 一对多
+
+在 POJO 类中一方持有多方的集合引用，多方持有一方对象引用
+
+```xml
+<resultMap type="user" id="userOrderResultMap">
+	<id property="id" column="id" />
+	<result property="username" column="username" />
+	<result property="birthday" column="birthday" />
+	<result property="sex" column="sex" />
+	<result property="address" column="address" />
+
+	<!-- 配置一对多的关系，通过 ofType 属性自动集合泛型 -->
+	<collection property="orders" javaType="list" ofType="order">
+		<!-- 配置主键，是关联Order的唯一标识 -->
+		<id property="id" column="oid" />
+		<result property="number" column="number" />
+	</collection>
+</resultMap>
+```
+
+###### 多对多
+
+多对多的关联关系需要在两方实体对象中均持有关联方的集合，例如学生与课程的关系
+
+```java
+public class Student {
+    private List<Course> courserList;
+}
+```
+
+```java
+publc class Course {
+    private List<Student> stuList;
+}
+```
+
+在表关系中，通过引入中间表来建立学生表与课程表之间的关系，中间表至少具有两个外键，分别指向学生表与课程表的主键
+
+在 MyBatis 映射关系配置中，使用两个 collection 进行关系映射，即使用两个一对多
+
+
+
+### 动态 SQL
+
+动态 SQL 是 MyBatis 的强大特性之一，使用 JDBC 进行 SQL 拼接时，要确保不能忘记添加必要的空格，还要注意去掉列表最后一个列名的逗号等问题，而通过 MyBatis 提供的标签方法可简单快速实现动态拼接 SQL
+
+###### if 
+
+功能同流程控制语句中的 if 语句，但没有 else
+
+```xml
+<select id="selectUserByUser" parameterType="user" resultType="user">
 	select id,username,password from user
     where 1=1
     <if test="username!=null and username!=''">
@@ -347,12 +415,34 @@ if 标签
 </select>
 ```
 
-where 标签
+###### choose, when ,otherwise
+
+功能同 if...else if...else
+
+```xml
+<!-- 存在名字根据名字查，否则根据价格查，都为空根据描述查 -->
+<select id="selectProduct" parameterType="Product" parameterType="Product">
+	select * from product where
+    <choose>
+        <when test="pname!=null">
+        	name=#{name}
+        </when>
+        <when test="price!=0">
+        	price=#{price}
+        </when>
+        <otherwise>
+        	desc=#{desc}
+        </otherwise>
+    </choose>
+</select>
+```
+
+###### where
 
 ```xml
 <select id="fingUserByUser" parameterType="user" resultType="user">
 	select id,username,password from user
-    <!-- where标签可以自动添加where，同时处理sql语句中第一个and关键字，这样可以不再添加1=1这样的条件去解决多and的问题 -->
+    <!-- where 元素只会在至少有一个子元素的条件返回 SQL 子句的情况下才去插入“WHERE”子句，而且，若语句的开头为“AND”或“OR”，where 元素也会将它们去除，这样可以不再添加1=1这样的条件去解决多and的问题 -->
     <where>
         <if test="username!=null and username!=''">
             and username like '%${username}%'
@@ -364,24 +454,51 @@ where 标签
 </select>
 ```
 
-SQL 片段
+###### set
+
+用于编写动态更新的 SQL 语句
 
 ```xml
-<!-- sql片段可将重复的sql提取出来，使用时用include引用即可，最终达到sql重用的目的 -->
-<sql id="selectSql">
-	select * from user
-</sql>
-<select id="findUserById" parameterType="Integer" resultType="user">
-    <!-- 如果要使用别的Mapper.xml配置的sql片段，可以在refid前面加上对应的Mapper.xml的namespace -->
-	<include refid="selectSql" />
-    where id = #{v}
-</select>
+<update id="">
+	update Author
+    <set>
+	    <if test="username != null">username=#{username},</if>
+	    <if test="password != null">password=#{password},</if>
+	    <if test="email != null">email=#{email},</if>
+	    <if test="bio != null">bio=#{bio}</if>
+	</set>
+	where id=#{id}
+</update>
 ```
 
-foreach 标签
+###### trim
 
 ```xml
-<!-- 例如在QueryVo中包含ids的集合，根据ids查询用户 -->
+<!-- 实现 where 的功能 -->
+<select id="">
+    select * from user
+    <trim prefix="WHERE" prefixoverride="AND |OR ">
+        <if test="name != null and name.length()>0"> AND name=#{name}</if>
+        <if test="gender != null and gender.length()>0"> AND gender=#{gender}</if>
+    </trim>
+</select>
+    
+<!-- 实现 set 的功能 -->
+<update id="">
+    update user
+    <trim prefix="set" suffixoverride="," suffix=" where id = #{id} ">
+        <if test="name != null and name.length()>0"> name=#{name} , </if>
+        <if test="gender != null and gender.length()>0"> gender=#{gender} ,  </if>
+    </trim>
+</update>
+```
+
+###### foreach
+
+可以将任何可迭代对象（如 List、Set 等）、Map 对象或者数组对象传递给 *foreach* 作为集合参数。当使用可迭代对象或者数组时，index 是当前迭代的次数，item 的值是本次迭代获取的元素。当使用 Map 对象（或者 Map.Entry 对象的集合）时，index 是键，item 是值
+
+```xml
+<!-- 例如在 QueryVo 中包含ids的集合，根据ids查询用户 -->
 <select id="queryUserByIds" parameterType="queryVo" resultType="user">
 	SELECT * FROM user
 	<where>
@@ -413,72 +530,97 @@ foreach 标签
 </foreach>
 ```
 
-### 关联查询
+###### SQL 片段
 
-###### 一对一查询
-
-使用 resultType，定义专门的pojo类作为输出类型，其中定义了sql查询结果集所有的字段
-
-```java
-//例如查询所有订单以及订单所属用户信息
-public class OrderUser extends Order {
-    //只需要定义用户信息字段
-    private String username;
-}
+```xml
+<!-- sql片段可将重复的sql提取出来，使用时用include引用即可，最终达到sql重用的目的 -->
+<sql id="selectSql">
+	select * from user
+</sql>
+<select id="findUserById" parameterType="Integer" resultType="user">
+    <!-- 如果要使用别的Mapper.xml配置的sql片段，可以在refid前面加上对应的Mapper.xml的namespace -->
+	<include refid="selectSql" />
+    where id = #{v}
+</select>
 ```
 
-使用 resultMap，定义专门的 resultMap 用于映射一对一查询结果
 
-```java
-//订单类中持有对象应用
-public class Order {
-    //...
-    private User user;
-    //getter setter...
-}
+
+### 延迟加载
+
+延迟加载其实就是将数据加载时机推迟，将采用高级映射实现多表联查时向数据库发出的 SQL 语句拆分成若干条单表查询的 SQL 语句，当需要返回数据时才会向数据库发出只针对当前数据的 SQL 语句
+
+先从单表查询、需要时再从关联表去关联查询，提升数据库性能，因为查询单表要比关联查询多张表速度要快，内存资源占用更少
+
+###### 延迟加载 setting 参数配置
+
+```xml
+<configuration>
+    <settings>
+        <!-- true:开启懒加载，所有关联对象都会延迟加载，默认为false -->
+    	<setting name="lazyLoadingEnabled" value="true" />
+        <!-- 侵入式加载，任何方法的调用都会加载该对象的所有属性，否则每个对象按需加载 -->
+        <setting name="aggressiveLazyLoading" value="false" />
+        <!-- 指定哪个对象的方法触发一次延迟加载 -->
+        <setting name="lazyLoadTriggerMethods" value="equals,clone,hashCode,toString"/>
+    </settings>
+</configuration>
+```
+
+###### 延迟加载映射文件配置
+
+```xml
+<mapper>
+    <resultMap id="" type="">
+        <association property="" javaType="" select="" column="" fetchType=""/>
+        <collection property="" ofType="" select="" column=""/>
+    </resultMap>
+</mapper>
+```
+
+
+
+### 缓存机制
+
+合理使用缓存是常见的优化方式，通过将从数据库查询出来的数据放入缓存中，下次再需要使用此数据时就可以直接从缓存中读取，避免了频繁的对数据库进行操作，减轻了数据库的压力，同时提高系统使用性能
+
+###### 一级缓存
+
+一级缓存的作用范围为 SqlSession，不同 SqlSession 之间的缓存数据区域不能互相读取，在 SqlSession 实例对象中有一个数据结构用于存储缓存数据
+
+一级缓存工作原理：
+
+当用户发起查询请求后，SqlSession 先去缓存中查找数据，如果有数据则直接返回，没有则从数据库查询并返回，通知将查询到的数据存入一级缓存区域；如果 SqlSession 执行 commit，即执行增删改操作时会清空一级缓存区域，避免发生脏读
+
+MyBatis 默认开启一级缓存，在与 spring 进行整合之后，如果没有事务，一级缓存是没有意义的
+
+###### 二级缓存
+
+二级缓存是 mapper 级别的缓存，多个 SqlSession 去操作同一个 Mappe r的 sql 语句，多个 SqlSession 可以共用二级缓存，二级缓存是跨 SqlSession 的
+
+UserMapper 有一个二级缓存区域（按 namespace 分），其它 mapper 也有自己的二级缓存区域（按 namespace 分）。每一个 namespace 的 mapper 都有一个二级缓存区域，两个 mapper 的 namespace 如果相同，这两个 mapper 执行 sql 查询到数据将存在相同的二级缓存区域中
+
+开启二级缓存
+
+```xml
+<!-- 在主配置文件中打开二级缓存总开关 -->
+<settings>
+	<setting name="cacheEnabled" value="true" />
+</settings>
 ```
 
 ```xml
-<resultMap type="order" id="orderUserResultMap">
-	<id property="id" column="id" />
-	<result property="userId" column="user_id" />
-	<result property="number" column="number" />
-	<result property="createtime" column="createtime" />
-	<result property="note" column="note" />
-
-	<!-- association ：配置一对一属性 -->
-	<!-- property:order里面的User属性名 -->
-	<!-- javaType:属性类型 -->
-	<association property="user" javaType="user">
-		<!-- id:声明主键，表示user_id是关联查询对象的唯一标识-->
-		<id property="id" column="user_id" />
-		<result property="username" column="username" />
-		<result property="address" column="address" />
-	</association>
-</resultMap
+<!-- 在需要开启二级缓存的 mapper.xml 中加入 cache 标签 -->
+<mapper>
+	<cache></cache>
+</mapper>
 ```
 
-###### 一对多查询
-
-在 POJO 类中添加多的一方的集合
-
-```xml
-<resultMap type="user" id="userOrderResultMap">
-	<id property="id" column="id" />
-	<result property="username" column="username" />
-	<result property="birthday" column="birthday" />
-	<result property="sex" column="sex" />
-	<result property="address" column="address" />
-
-	<!-- 配置一对多的关系 -->
-	<collection property="orders" javaType="list" ofType="order">
-		<!-- 配置主键，是关联Order的唯一标识 -->
-		<id property="id" column="oid" />
-		<result property="number" column="number" />
-		<result property="createtime" column="createtime" />
-		<result property="note" column="note" />
-	</collection>
-</resultMap>
-
+```java
+//使用二级缓存的 POJO 类实现 Serializable 接口
+public class Student implements Serializable {}
 ```
 
+何时使用二级缓存
+
+对于查询多 commit 少且用户对查询结果实时性要求不高，此时采用 mybatis 二级缓存技术可以降低数据库访问量，提高访问速度；但是二级缓存也存在着弊端，二级缓存是建立在同一个 namespace 下的，如果对表的操作查询可能有多个 namespace，那么得到的数据就是错误的

@@ -1,35 +1,44 @@
+# 概述
 
+平时学习笔记的整理，方便自己的复习与回顾
 
-### 算法
+## JAVA SE
 
-- [算法](notes/算法.md)
+- [基础](notes/Java.md)
+- [Java虚拟机](notes/JVM.md)
 
-### 网络
-
-- [图解HTTP](../notes/图解HTTP.md)
-
-### 数据库
-
-- [SQL](notes/SQL.md)
-
-### Java web
+## JAVA EE
 
 - [Web](notes/Javaweb.md)
 
-### web 前端
+## 框架
+
+- [Hibernate](notes/HIBERNATE.md)
+- [Spring](notes/SPRING.md)
+- [MyBatis](notes/MYBATIS.md)
+
+## 数据库
+
+- [SQL](notes/SQL.md)
+
+## 前端
 
 - [HTML](notes/HTML.md)
 - [CSS](notes/CSS.md)
 - [JS](notes/JS.md)
 
-### Java 基础
+## 算法
 
-- [基础](notes/Java.md)
+- [算法](notes/algorithm.md)
 
-### 框架
+## 操作系统
 
-- [HIBERNATE](notes/HIBERNATE.md)
+- [Linux](notes/LINUX.md)
 
-### 工具
+## 网络
+
+- [图解HTTP](notes/图解HTTP.md)
+
+## 工具
 
 - [Git](notes/Git.md)
