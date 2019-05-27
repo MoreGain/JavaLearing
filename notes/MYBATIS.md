@@ -9,6 +9,10 @@ MyBatis 原来是 apache 的一个开源项目 iBatis，2010 年由 apache softw
 
 MyBatis 是一个持久层框架，对 jdbc 的操作数据库的过程进行了封装，使开发者只需要关注 SQL 本身。它通过 xml 或注解的方式将要执行的各种 statement 配置起来，通过 Java 对象和 statement 中的 SQL 进行映射生成最终执行的 SQL 语句，最后由 MyBatis 框架执行 SQL 并将结果映射成 Java 对象并返回
 
+官方文档：
+
+MyBatis 是一款优秀的持久层框架，它支持定制化 SQL、存储过程以及高级映射。MyBatis 避免了几乎所有的 JDBC 代码和手动设置参数以及获取结果集。MyBatis 可以使用简单的 XML 或注解来配置和映射原生类型、接口和 Java 的 POJO（Plain Old Java Objects，普通老式 Java 对象）为数据库中的记录
+
 ### MyBatis 解决原生 JDBC 问题总结
 
 1. 数据库频繁创建连接、释放资源造成系统资源的浪费，影响系统性能（使用数据库连接池可以解决）
@@ -17,11 +21,11 @@ MyBatis 是一个持久层框架，对 jdbc 的操作数据库的过程进行了
 
 2. SQL 语句存在硬编码问题，实际应用中 SQL 变化的可能性较大，SQL 变动需要改变 Java 代码，造成代码不易维护
 
-   解决：将 SQL 语句配置再 mapper.xml 中实现与 Java 代码分离
+   解决：将 SQL 语句配置在 mapper.xml 中实现与 Java 代码分离
 
 3. 使用 preparedStatemet 对占位符传参数存在硬编码，SQL 语句的条件可能增加或减少
 
-   解决：MyBatis 自动将java对象映射至 SQL 语句，通过 statement 中的 parameterType 定义输入参数的类型
+   解决：MyBatis 自动将 java 对象映射至 SQL 语句，通过 statement 中的 parameterType 定义输入参数的类型
 
 4. 结果集的解析存在硬编码，SQL 变化可能导致解析代码变化（将数据库记录封装成 POJO 对象解析比较方便）
 
@@ -111,8 +115,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <!-- namespace：命名空间，用于隔离sql，还有一个很重要的作用，后面会讲 -->
 <mapper namespace="user">
+    
 </mapper>
+```
 
+```xml
 <!-- 在 SqlMapConfig.xml 中加载映射文件 -->
 <mappers>
 	<mapper resource="User.xml" />
@@ -203,7 +210,7 @@ Mapper接口开发需要遵循以下规范：
 
 4. Mapper 接口方法的输出参数类型和 mapper.xml 中定义的每个 sql 的 resultType 的类型相同
 
-### SqlMapConfig.xml 配置文件
+### MyBaits 核心配置文件
 
 ```xml
 <!-- 主配置文件 -->
@@ -214,6 +221,8 @@ Mapper接口开发需要遵循以下规范：
     	<!-- 也可在内部通过 property 定义属性，如果外部配置文件定义该属性，则内部定义被覆盖，因为 MyBatis 先读取 properties 元素体内定义的属性，再读取 properties 元素中 resource 或 url 加载的属性，后读取的覆盖先读取的同名属性 -->
         <property name="jdbc.username" value="root" />
     </properties>
+    
+    <settings></settings>
 	
     <!-- 类型别名，MyBatis 默认已经支持一些别名，如基本数据类型及其包装类型，Stirng，Date，Map 等等，通过以下标签可以自定义别名 -->
     <typeAilases>
@@ -235,6 +244,32 @@ Mapper接口开发需要遵循以下规范：
     </mappers>
 
 </configuration>
+```
+
+
+
+### 映射文件配置
+
+```xml
+<mapper>
+    <!-- 开启二级缓存 -->
+    <cache></cache>
+    <!-- 引用其他命名空间作为二级缓存区域 -->
+    <cache-ref namespace=""></cache-ref>
+    <!-- 描述如何加载结果集 -->
+    <resultMap></resultMap>
+    <!-- SQL 片段，使用 include 进行引用 -->
+    <sql id=""></sql>
+    <!-- 显示均为默认值，当主键不是第一列时需要设置 keyColumn -->
+    <insert flushCache="true"
+            useGeneratedKeys="false"
+            keyProperty="" 
+            keyColumn=""></insert>
+    <update></update>
+    <delete></delete>
+    <select flushCache="false"
+            userCahe="true"></select>
+</mapper>
 ```
 
 
@@ -596,7 +631,7 @@ MyBatis 默认开启一级缓存，在与 spring 进行整合之后，如果没�
 
 ###### 二级缓存
 
-二级缓存是 mapper 级别的缓存，多个 SqlSession 去操作同一个 Mappe r的 sql 语句，多个 SqlSession 可以共用二级缓存，二级缓存是跨 SqlSession 的
+二级缓存是 mapper 级别的缓存，多个 SqlSession 去操作同一个 Mapper 的 sql 语句，多个 SqlSession 可以共用二级缓存，二级缓存是跨 SqlSession 的
 
 UserMapper 有一个二级缓存区域（按 namespace 分），其它 mapper 也有自己的二级缓存区域（按 namespace 分）。每一个 namespace 的 mapper 都有一个二级缓存区域，两个 mapper 的 namespace 如果相同，这两个 mapper 执行 sql 查询到数据将存在相同的二级缓存区域中
 
@@ -624,3 +659,114 @@ public class Student implements Serializable {}
 何时使用二级缓存
 
 对于查询多 commit 少且用户对查询结果实时性要求不高，此时采用 mybatis 二级缓存技术可以降低数据库访问量，提高访问速度；但是二级缓存也存在着弊端，二级缓存是建立在同一个 namespace 下的，如果对表的操作查询可能有多个 namespace，那么得到的数据就是错误的
+
+注意：二级缓存是事务性的。这意味着，当 SqlSession 完成并提交时，或是完成并回滚，但没有执行 flushCache=true 的 insert/delete/update 语句时，缓存会获得更新。
+
+
+
+### 注解使用
+
+@Select
+
+@Insert
+
+@Update
+
+@Delete
+
+@Results
+
+@Result
+
+@One
+
+@Many
+
+
+
+### 逆向工程
+
+`MyBatis`逆向工程需要用到的就是MyBatis官方提供的 `MyBatis Generator（MBG）`。`MBG` 是 `MyBatis` 和 `iBATIS` 的代码生成器，它将为所有版本的 `MyBatis` 以及版本 2.2.0 之后的 `iBATIS` 版本生成代码。`MBG` 对简单 `CRUD`（增删改查）的大部分数据库操作产生重大影响。但是您仍然需要为连接查询或存储过程手动编写SQL和对象代码
+
+创建好数据库表之后，`MBG` 可以根据数据库表自动生成 `pojo类` 、 `example类(用于添加条件，相当where语句后面的部分 )`、`mapper文件`
+
+###### 使用逆向工程
+
+1. 导入 jar 包
+
+   `mybatis-generator-core-1.3.7.jar`
+
+2. 书写配置文件
+
+   ```xml
+   <?xml version="1.0" encoding="UTF-8"?>
+   <!DOCTYPE generatorConfiguration
+     PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+     "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+   
+   <generatorConfiguration>
+       <context id="testTables" targetRuntime="MyBatis3">
+           <commentGenerator>
+               <!-- 是否去除自动生成的注释 true：是 ： false:否 -->
+               <property name="suppressAllComments" value="true" />
+           </commentGenerator>
+           <!--数据库连接的信息：驱动类、连接地址、用户名、密码 ,加上“useSSL=false”是因为我SSL连接数据库出现了错误 -->
+           <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+               connectionURL="jdbc:mysql://localhost:3306/test"
+               userId="root" password="xxx">
+           </jdbcConnection>
+           <!-- 默认false，把JDBC DECIMAL 和 NUMERIC 类型解析为 Integer，为true时把JDBC DECIMAL 
+               和 NUMERIC 类型解析为java.math.BigDecimal -->
+           <javaTypeResolver>
+               <property name="forceBigDecimals" value="false" />
+           </javaTypeResolver>
+   
+           <!-- targetProject:生成pojo类的位置 -->
+           <javaModelGenerator targetPackage="pojo"
+               targetProject=".\src\main\java">
+               <!-- enableSubPackages:是否让schema作为包的后缀 -->
+               <property name="enableSubPackages" value="false" />
+               <!-- 从数据库返回的值被清理前后的空格 -->
+               <property name="trimStrings" value="true" />
+           </javaModelGenerator>
+   
+           <!-- targetProject:mapper映射文件生成的位置 -->
+           <sqlMapGenerator targetPackage="mapper" targetProject=".\src\main\java">
+               <!-- enableSubPackages:是否让schema作为包的后缀 -->
+               <property name="enableSubPackages" value="false" />
+           </sqlMapGenerator>
+   
+           <!-- targetPackage：mapper接口生成的位置 -->
+           <javaClientGenerator type="XMLMAPPER"
+               targetPackage="mapper" targetProject=".\src\main\java">
+               <!-- enableSubPackages:是否让schema作为包的后缀 -->
+               <property name="enableSubPackages" value="false" />
+           </javaClientGenerator>
+   
+           <!-- 指定数据库表 -->
+           <table schema="" tableName="empolyee"></table>
+           <table schema="" tableName="department"></table>
+       </context>
+   </generatorConfiguration>
+   ```
+
+3. 书写逆向工程代码
+
+   ```java
+   public class Generator {
+       public static void main(String[] args) {
+          List<String> warnings = new ArrayList<String>();
+          boolean overwrite = true;
+          //读取xml配置文件，推荐使用这种方式
+          File configFile = new File("generatorConfig.xml");
+          ConfigurationParser cp = new ConfigurationParser(warnings);
+          Configuration config = cp.parseConfiguration(configFile);
+          DefaultShellCallback callback = new DefaultShellCallback(overwrite);
+          MyBatisGenerator myBatisGenerator = new MyBatisGenerator(config, callback, warnings);
+          myBatisGenerator.generate(null);
+       }
+   }
+   ```
+
+   
+
