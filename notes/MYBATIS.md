@@ -33,7 +33,7 @@ MyBatis 是一款优秀的持久层框架，它支持定制化 SQL、存储过�
 
 ### MyBatis 架构
 
-![MyBatis 架构](../images/MYBATIS constructure.PNG)
+![MyBatis 架构](../images/MYBATIS%20constructure.PNG)
 
 Executor 具有 BaseExecutor 和 CacheExecutor 两个实现类
 
@@ -659,6 +659,7 @@ public class Student implements Serializable {}
 何时使用二级缓存
 
 对于查询多 commit 少且用户对查询结果实时性要求不高，此时采用 mybatis 二级缓存技术可以降低数据库访问量，提高访问速度；但是二级缓存也存在着弊端，二级缓存是建立在同一个 namespace 下的，如果对表的操作查询可能有多个 namespace，那么得到的数据就是错误的
+<<<<<<< HEAD
 
 注意：二级缓存是事务性的。这意味着，当 SqlSession 完成并提交时，或是完成并回滚，但没有执行 flushCache=true 的 insert/delete/update 语句时，缓存会获得更新。
 
@@ -770,3 +771,5 @@ public class Student implements Serializable {}
 
    
 
+=======
+>>>>>>> 8c0970afe291e1b9801a3938ce0f4c32bcc58683
