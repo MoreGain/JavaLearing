@@ -36,15 +36,45 @@ spring 是对象的容器，它是一个一站式框架，这是因为它是容�
 
 1. 导包
 
-   4+2：
+   4(core/beans/context/expression)+2(log4j/logging)：
 
 2. 准备对象
+
+   ```java
+   public class User {
+       private Integer id;
+       private String name;
+       //getter/setter...
+   }
+   ```
 
 3. 书写配置
 
    建议放在 src 目录下，建议命名为 applicationContext.xml
 
+   ```xml
+   <!-- 引入约束 spring-beans.xsd -->
+   <beans xmlns ="http://www.springframework.org/schema/beans"
+   	xmlns:xsi =="http://www.w3.org/2001/XMLSchema-instance"
+   	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+   	<bean name="user" class="com.project.bean.User"></bean>
+   </beans>
+   ```
+
 4. 书写测试代码
+
+   ```java
+   public class Test {
+       public static void main(String[] args) {
+           //创建spring的工厂类
+           ApplicationContext ac = new ClassPathXmlApplicationContext("applicationContext.xml");
+           //通过工厂解析XML获得Bean实例
+           User user = (User)ac.getBean("user");
+       }
+   }
+   ```
+
+   
 
 ### spring 思想
 
@@ -54,7 +84,8 @@ Inverse of Control，控制反转；创建对象的方式反转了，从我们�
 
 ###### DI 
 
-Dependency Injection，依赖注入；将必须的属性注入到对象当中，是实现 IoC 思想必须条件
+Dependency Injection，依赖注入；需要有 IOC 的环境 ，Spring 创建这个类的过程中 ,Spring 将类的依
+赖的属性设置进去
 
 ### ApplicationContext & BeanFactory
 
@@ -105,12 +136,13 @@ BeanFactory 接口实现的容器，每次在获得对象时才会创建对象
 			prototype:被标识为多例的对象，每次再获得才会创建，每次创建都是新的对象。整合struts2时，ActionBean必须配置为多例的
 			request:web环境下，对象与request生命周期一致
 			session:web环境下，对象与session生命周期一致
+			globalSession:web环境下，应用在Porlet环境，没有此环境则相当于session
 	-->
     <bean name="user" class="com.project.pojo.User" scope="single"></bean>
     
     <!-- bean元素的生命周期属性：
 		init-method:可配置一个方法作为生命周期初始化方法，spring会在对象创建后立即调用；
-		destory-method:可配置一个方法作为生命周期的销毁方法，spring会在关闭并销毁所有容器中的对象之前调用
+		destory-method:可配置一个方法作为生命周期的销毁方法，spring会在关闭并销毁所有容器中的对象之前调用，必须是单例创建的bean在工厂关闭的时候才会执行
 	-->
     <!-- init/destory为User类的方法 -->
     <bean name="user" class="com.project.pojo.User" 
@@ -123,6 +155,7 @@ BeanFactory 接口实现的容器，每次在获得对象时才会创建对象
 ```xml
 <!-- 导入其他的spring配置文件 -->
 <import resource="com/project/applicationContext.xml" />
+<!-- 也可直接在创建工厂时加载多个配置文件 -->
 ```
 
 ###### spring 的属性注入方式
@@ -176,6 +209,7 @@ spring Expression Language，spring 表达式语言
 ```xml
 <bean name="user" class="com.project.pojo.User">
     <!-- 使用user1的name值作为user的name值，使用user2的age值作为user的age值 -->
+    <property name="name" value="#{'lisi'}"></property>
     <property name="name" value="#{user1.name}"></property>
     <property name="age" value="#{user2.age}"></property>
     <!-- 引用类型不能使用spel表达式注入 -->
@@ -319,12 +353,12 @@ public class User {
     @Autowired 
     //使用@Qualifier注解告诉spring容器自动装配那个名称的对象，和Autowired配合使用
     @Qualifier("car1")
-    //手动注入，指定注入哪个名称的对象，推荐使用
+    //手动注入，指定注入哪个名称的对象，推荐使用，相当于@Autowired @Qualifier("car1")一起使用
     @Resource(name="car2")
     private Car car;
     
     //指定初始化方法，在对象被创建后调用 init-method
-    @PreConstruct()
+    @PostConstruct()
     public void init() {
         
     }
@@ -366,6 +400,8 @@ spring 插件
 
 ### spring AOP
 
+AOP 最早由 AOP 联盟的组织提出的制定了一套规范 .Spring 将 AOP 思想引入到框架中，必须遵守 AOP 联盟的规范；AOP 解决 OOP 中遇到的一些问题，是 OOP 的延续和扩展；AOP 可以在不修改源码的情况下对程序进行增强 ，例如进行权限校验、日志记录、性能监控、事务控制等
+
 AOP 思想：横向重复，纵向抽取；Filter、动态代理、struts 中的拦截器其实都使用了 AOP 思想
 
 spring 能够为容器中管理的对象生成动态代理对象，以前要使用动态代理，我们需要使用以下方法
@@ -378,7 +414,63 @@ Proxy.newProxyInstance(ClassLoader loader,Interface[] arr,InvocationHandler hand
 
 动态代理（优先使用）：被代理对象必须实现接口，才能产生代理对象，如果没有接口将不能使用动态代理技术
 
-CGLIB 代理（没有接口时使用）：第三发代理技术，可以对任何类产生代理，代理的原理是对目标对象进行继承代理，如果目标对象被 final 修饰，那么该类无法被 CGLIB 代理
+```java
+public class MyJDKProxy implements InvocationHandler {
+    private UserDao userDao;
+    public My JDKProxy(UserDao userDao ){
+        this userDao = userDao;
+    }
+    // 编写工具方法：生成代理：
+    public UserDao createProxy() {
+        UserDao userDaoProxy = (UserDao)Proxy.newProxyInstance(userDao.getClass().getClassLoader(),userDao.getClass().getInterfaces(),this);
+		return userDaoProxy;
+    }
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args ) throws Throwable {
+        if("save".equals(method.getName())){
+            SYstem.out.println("权限验证");
+            return method.invoke(userDao, args);
+        }
+    }
+}
+```
+
+
+
+CGLIB 代理（没有接口时使用）：第三方代理技术，可以对任何类产生代理，代理的原理是对目标对象进行继承代理，如果目标对象被 final 修饰，那么该类无法被 CGLIB 代理
+
+```java
+public class MyCglibProxy implements MethodInterceptor {
+    private CustomerDao customerDao;
+    public MyCglibProxy(CustomerDao customerDao){
+        this customerDao = customerDao;
+    }
+    //生成代理的方法
+    public CustomerDao createProxy(){
+        // 创建 Cglib 的核心类
+		Enhancer enhancer = new Enhancer();
+		// 设置父类
+		enhancer.setSuperclass(CustomerDao.class);
+		// 设置回调
+		enhancer.setCallback(this);
+		// 生成代理
+        CustomerDao customerDaoProxy = (CustomerDao)enhancer.careate();
+        return customerDaoProxy;
+    }
+    
+    @Override
+	public Object intercept(Object proxy,Method method,Object[] args,MethodProxy methodProxy) throws Throwable {
+         if("delete".equals(method.getName()) {
+            Object obj = methodProxy.invokeSuper(proxy, args);
+            System.out.println("日志记录");
+            return obj;
+        }
+        return methodProxy.invokeSuper(proxy, args);
+    }
+}
+```
+
+
 
 ###### AOP 名词
 
@@ -474,7 +566,7 @@ Aspect(切面): 切入点+通知
 
 ###### 使用注解配置 AOP
 
-开启使用注解完成织入，开启后可直接在通知类中使用注解配置
+开启使用注解完成织入，开启后可直接在通知类中使用注解配置，目标类和通知类依然需要配置到 spring 容器
 
 ```xml
 <beans>
@@ -515,3 +607,127 @@ public class MyAdvice{
 }
 ```
 
+### Spring 整合 JDBC
+
+spring 提供了一个可以操作数据库的对象，即 JDBCTemplate，JDBC 模板对象，它封装了 JDBC 技术
+
+Spring 提供了很多持久层技术的模板类简化编程
+
+> JDBC--jdbcTemplate
+>
+> Hibernate--HIbernateTemplate
+>
+> IBatis--SqlMapClientTemplate
+>
+> JPA--JpaTemplate
+
+###### 使用准备
+
+1. 导包：4+2+spring-test/spring-aop/junit4+c3p0/JDBC驱动+spring-jdbc/spring-tx
+
+2. 创建数据库和表
+
+3. 创建测试类
+
+   ```java
+   @RunWith (SpringJUnit4ClassRunner.class)
+   @ContextConfiguration("classpath:applicationContext.xml)
+   public class TestJDBCTemplate {
+       public void test() {
+           DriverManagerDataSource dataSource = new DriverManagerDataSource();
+           dateSource.setDriverClassName("com.mysql.jdbc.Driver");
+           dataSource.setUrl("jdbc:mysql:///test");
+           dataSource.setUsername("root");
+           dataSource.setPassword("xxx");
+           //操作类似于DBUtils
+           JdbcTemplate jdbcTemplate = new JDBCTemplate(dataSource);
+           jdbcTemplate.update("insert into user values(null,?,?)","lisi","l123");
+       }
+   }
+   ```
+
+4. 将连接池管理交给 Spring
+
+   ```xml
+   <!-- 配置 spring 内置连接池 -->
+   <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+   	<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+       ...
+   </bean>
+   <!-- 配置JDBC模板 -->
+   <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+   	<property name="dataSource" ref="dataSource" />
+   </bean>
+   ```
+
+   ```xml
+   <!-- spring 配置 DBCP 连接池，需导入dbcp所需jar包 -->
+   <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+   	<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+       ...
+   </bean>
+   <!-- spring 配置 C3p0 连接池，需导入C3p0所需jar包 -->
+   <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+   	<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+       ...
+   </bean>
+   ```
+
+   将连接池配置定义在外部文件中，在引入配置
+
+   ```xml
+   <!-- 方式一 -->
+   <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+   	<porperty name="location" value="classpath:jdbc.properties" />
+   </bean>
+   <!-- 方式二 -->
+   <context:property-placeholder location="classpath:jdbc.properties" />
+   ```
+
+   
+
+### Spring 的 AOP 事务
+
+spring 封装了事务管理代码，打开事务，提交事务，回滚事务
+
+因为在不同平台，操作事务的代码各不相同，Spring 提供了一个接口 `PlatformTransactionManager` ，对于不同的操作平台有不同的实现类，它们是真正管理事务的对象
+
+> DatasourceTransactionManager	使用Spring JDBC或iBatis 进行持久化数据时使用
+>
+> HiberbnateTransactionManager	使用Hibernate版本进行持久化数据时使用
+
+使用 spring 管理事务，最核心的对象就是 `TransactionManager` 
+
+spring 管理事务的属性
+
+1. 事务的隔离级别
+
+2. 是否只读
+
+   true/false
+
+3. 事务的传播行为
+
+   决定业务之间调用方法时，事务的处理方法
+
+   PROPAGATION_REQUIRED	支持当前事务，如果不存在，就新建一个（默认）
+
+   PROPAGATION_SUPPORTS	支持当前事务，如果不存在，就不使用事务
+
+   PROPAGATION_MANDATORY	支持当前事务，如果不存在，抛出异常
+
+   PROPAGATION_REQUIRES_NEW	如果有事务存在，挂起当前事务，创建一个新的事务
+
+   PROPAGATION_NOT_SUPPORTED	 以非事务方式运行，如果有事务存在，挂起当前事务
+
+   PROPAGATION_NEVER	以非事务方式运行，如果有事务存在，抛出异常
+
+   PROPAGATION_NESTED	如果当前事务存在，则嵌套事务执行
+
+spring 管理事务的三种方式
+
+1. 编码式
+
+   
+
+2. 
