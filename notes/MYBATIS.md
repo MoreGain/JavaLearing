@@ -155,7 +155,7 @@ User.xml 具体配置信息
  	parameterType：指定输入参数类型，mybatis通过ognl从输入对象中获取参数值拼接在sql中
 	resultType：指定输出结果类型，mybatis将sql查询结果的一行记录数据映射为resultType指定类型的对象。如果有多条数据，则分别进行映射，并把对象放到容器List中
 	-->
-	<select id="queryUserById" paramerterType="Integer" resultType="com.project.mybatis.pojo.User">
+    <select id="queryUserById" paramerterType="Integer" resultType="com.project.mybatis.pojo.User">
         <!-- #{} 输入参数的占位符，相当于 jdbc 的 ？ -->
     	SELECT * FROM user WHERE id = #{v}
     </select>
@@ -222,7 +222,11 @@ Mapper接口开发需要遵循以下规范：
         <property name="jdbc.username" value="root" />
     </properties>
     
-    <settings></settings>
+    <settings>
+        <setting name="logImpl" value="LOG4J"></setting>
+        <setting name="lazyLoadingEnabled" value="true"></setting>
+        <setting name="aggressiveLazyLoading" value="fasle"></setting>
+    </settings>
 	
     <!-- 类型别名，MyBatis 默认已经支持一些别名，如基本数据类型及其包装类型，Stirng，Date，Map 等等，通过以下标签可以自定义别名 -->
     <typeAilases>
@@ -231,6 +235,19 @@ Mapper接口开发需要遵循以下规范：
         <!-- 批量别名定义，扫描整个包下的类，别名为类名 -->
         <package name="com.project.mybatis.pojo" />
     </typeAilases>
+    
+    <typeHandlers></typeHandlers>
+    <objectFactory></objectFactory>
+    <plugins></plugins>
+    
+    <environments>
+    	<environment>
+        	<transactionManager></transactionManager>
+            <dataSource></dataSource>
+        </environment>
+    </environments>
+    
+    <databaseIdProvider></databaseIdProvider>
     
     <mappers>
     	<!-- mapper 的多种配置方式 -->
@@ -768,8 +785,3 @@ public class Student implements Serializable {}
        }
    }
    ```
-
-   
-
-=======
->>>>>>> 8c0970afe291e1b9801a3938ce0f4c32bcc58683

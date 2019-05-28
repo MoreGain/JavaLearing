@@ -75,3 +75,55 @@ select * from T where id = 10;
 ###### 存储引擎层
 
 ###### 问题：“Unknown column 'id' in 'where clause'” 错误是从哪个阶段报出的？
+
+
+
+### 一条 SQL 更新语句是怎样执行的
+
+```sql
+create table book(id int primary key, number int);
+```
+
+```sql
+update book set number=number+10 where id = 5;
+```
+
+清空表缓存
+
+###### 重做日志 redo log
+
+```sql
+innodb_flush_log_at_trx_commit=1
+```
+
+InnoDB 特有的日志
+
+WAL(write-ahead logging)
+
+InnoDB: update-->redo log-->update memory-->wirte to disk(free time)
+
+write pos, chickpoint
+
+crash-safe
+
+###### 归档日志 binlog 
+
+```sql
+sync_binlog=1
+```
+
+Server 层的日志
+
+两种日志的比较：redo log 引擎层，binlog Server 层；redo log 物理日志，binlog 逻辑日志；redo log 循环写入，binlog 追加写入
+
+update 具体执行流程
+
+两阶段提交
+
+为什么要有两阶段提交？反证法（crash)
+
+怎样让数据库恢复到半个月内任意一秒的状态？
+
+redo log 和 binlog 都可以用于表示事务的提交状态，两阶段提交让这两个阶段保持逻辑上的一致
+
+###### 什么场景下，一天一备比一周一备更有优势？它影响这个数据库系统的哪个指标？

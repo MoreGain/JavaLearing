@@ -113,11 +113,11 @@ BeanFactory 接口实现的容器，每次在获得对象时才会创建对象
 <?xml version="1.0" encoding="UTF-8"?>
 <beans >
 	<!-- Bean元素：描述需要spring容器管理的对象 -->
-	<!-- 
- 		name:给被管理对象取的名字，获得对象时根据该名称获得对象，可重复，可以使用特殊字符
-		class:被管理对象的完整类名
-		id:与name属性一样，但要遵循名称不可重复，不能使用特殊字符的原则
-	-->
+    <!-- 
+        name:给被管理对象取的名字，获得对象时根据该名称获得对象，可重复，可以使用特殊字符
+        class:被管理对象的完整类名
+        id:与name属性一样，但要遵循名称不可重复，不能使用特殊字符的原则
+    -->
     <bean id="user" name="user" class="com.project.pojo.User"></bean>
     
     <!-- spring 创建对象的三种方式 -->
@@ -132,18 +132,18 @@ BeanFactory 接口实现的容器，每次在获得对象时才会创建对象
     <bean name="userFactory" class="com.project.factory.UserFactory"></bean>
     
     <!-- bean元素的作用范围scope属性：
- 			singleton:默认值，单例对象，被标识为单例的对象在spring容器中只会存在一个实例。绝大多数情况下均使用默认值
-			prototype:被标识为多例的对象，每次再获得才会创建，每次创建都是新的对象。整合struts2时，ActionBean必须配置为多例的
-			request:web环境下，对象与request生命周期一致
-			session:web环境下，对象与session生命周期一致
-			globalSession:web环境下，应用在Porlet环境，没有此环境则相当于session
-	-->
+            singleton:默认值，单例对象，被标识为单例的对象在spring容器中只会存在一个实例。绝大多数情况下均使用默认值
+            prototype:被标识为多例的对象，每次再获得才会创建，每次创建都是新的对象。整合struts2时，ActionBean必须配置为多例的
+            request:web环境下，对象与request生命周期一致
+            session:web环境下，对象与session生命周期一致
+            globalSession:web环境下，应用在Porlet环境，没有此环境则相当于session
+    -->
     <bean name="user" class="com.project.pojo.User" scope="single"></bean>
     
     <!-- bean元素的生命周期属性：
-		init-method:可配置一个方法作为生命周期初始化方法，spring会在对象创建后立即调用；
-		destory-method:可配置一个方法作为生命周期的销毁方法，spring会在关闭并销毁所有容器中的对象之前调用，必须是单例创建的bean在工厂关闭的时候才会执行
-	-->
+        init-method:可配置一个方法作为生命周期初始化方法，spring会在对象创建后立即调用；
+        destory-method:可配置一个方法作为生命周期的销毁方法，spring会在关闭并销毁所有容器中的对象之前调用，必须是单例创建的bean在工厂关闭的时候才会执行
+    -->
     <!-- init/destory为User类的方法 -->
     <bean name="user" class="com.project.pojo.User" 
           init-method="init" destory-method="destory"></bean>
@@ -164,7 +164,7 @@ set 方法注入
 
 ```xml
 <bean name="user" class="com.project.pojo.User">
-	<!-- 值类型注入：为user对象中的name属性注入zhangsan作为值 -->
+    <!-- 值类型注入：为user对象中的name属性注入zhangsan作为值 -->
     <property name="name" value="zhangsan"></property>
     <!-- 引用类型注入：为car属性注入cat对象，需要将car对象配置到容器中 -->
     <property name="car" ref="car"></property>
@@ -176,12 +176,12 @@ set 方法注入
 ```xml
 <bean name="user" class="com.project.pojo.User">
     <!-- 使用index和type属性解决构造函数重载的问题
- 			name:构造函数参数名
-			value:构造函数参数值
-			index:构造函数参数位置
-			type:构造函数参数类型
-	-->
-	<constructor-arg name="name" value="jerry" 
+            name:构造函数参数名
+            value:构造函数参数值
+            index:构造函数参数位置
+            type:构造函数参数类型
+    -->
+    <constructor-arg name="name" value="jerry" 
                      index="0" type="java.lang.String"></constructor-arg>
     <constructor-arg name="car" ref="car" index="1"></constructor-arg>
 </bean>
@@ -193,9 +193,9 @@ p 名称空间注入
 <!-- 需要先引入p命名空间 -->
 <beans ...xmlns:p="http://www.springframework.org/schema/p"...>
     <!-- 使用p:属性完成注入，实际上也是使用的set方式注入
- 			值类型：p:属性名="值"
-			对象类型：p:属性名-ref="bean名称"
-	-->
+            值类型：p:属性名="值"
+            对象类型：p:属性名-ref="bean名称"
+    -->
     <bean name="user" class="com.project.pojo.User"
           p:name="tom" p:age="18" p:car-ref="car"></bean>
 </beans>
@@ -299,12 +299,12 @@ properties 类型注入
    ```xml
    <listen>
        <!-- 让spring容器随项目的启动而创建，随项目的关闭而销毁 -->
-   	<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+       <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
    </listen>
    
    <!-- 指定加载 spring 配置文件的位置 -->
    <context-param>
-   	<param-name>contextConfigLocation</param-name>
+       <param-name>contextConfigLocation</param-name>
        <param-value>classpath:applicationContext.xml</param-value>
    </context-param>
    ```
@@ -313,10 +313,10 @@ properties 类型注入
 
    ServletContextListener 将 spring 容器创建后放在 application 域对象中
 
-   ```xml
-   <!-- 获得 ServletContext 对象，以下为 strust 获得 ServletContext 的方法 -->
+   ```java
+   //获得 ServletContext 对象，以下为 strust 获得 ServletContext 的方法
    ServletContext sc = ServletActionContext.getServletContext();
-   <!-- 将 sc 传递给 spring 提供的工具类方法从域中获得 spring 容器 -->
+   //将 sc 传递给 spring 提供的工具类方法从域中获得 spring 容器
    WebApplicationContext cs = WebApplicationContextUtils.getWebApplicationContext(sc);
    ```
 
@@ -545,9 +545,9 @@ Aspect(切面): 切入点+通知
    <bean name="myAdvice" class="com.project.aop.MyAdvice"></bean>
    <!-- 配置将通知织入目标对象 -->
    <aop:config>
-   	<!-- 配置切入点
-    		public void com.project.service.UserServiceImpl.save()
-   	-->
+       <!-- 配置切入点
+            public void com.project.service.UserServiceImpl.save()
+       -->
        <aop:pointcut expression="execution(* com.project.service.*ServiceImpl.*(..))" id="pc"></aop:pointcut>
        <aop:aspect ref="myAdvice">
            <!-- 指定名为 before 方法作为前置通知 -->
@@ -570,7 +570,7 @@ Aspect(切面): 切入点+通知
 
 ```xml
 <beans>
-	<aop:aspect-autoproxy></aop:aspect-autoproxy>
+    <aop:aspect-autoproxy></aop:aspect-autoproxy>
 </beans>
 ```
 
@@ -579,9 +579,9 @@ Aspect(切面): 切入点+通知
 public class MyAdvice{
     @Before("execution(* com.project.service.*ServiceImpl.*(..))")
     public void before(){...}
-	@AfterReturning("execution(* com.project.service.*ServiceImpl.*(..))")
+    @AfterReturning("execution(* com.project.service.*ServiceImpl.*(..))")
     public void afterReturning(){...}
-	@Around("execution(* com.project.service.*ServiceImpl.*(..))")
+    @Around("execution(* com.project.service.*ServiceImpl.*(..))")
     public Object around(ProceedingJoinPoint pjp){
         ...;
         Object proceed = pjp.proceed();	//调用目标方法
@@ -651,24 +651,24 @@ Spring 提供了很多持久层技术的模板类简化编程
    ```xml
    <!-- 配置 spring 内置连接池 -->
    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-   	<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+       <property name="driverClassName" value="com.mysql.jdbc.Driver" />
        ...
    </bean>
    <!-- 配置JDBC模板 -->
    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
-   	<property name="dataSource" ref="dataSource" />
+       <property name="dataSource" ref="dataSource" />
    </bean>
    ```
 
    ```xml
    <!-- spring 配置 DBCP 连接池，需导入dbcp所需jar包 -->
    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
-   	<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+       <property name="driverClassName" value="com.mysql.jdbc.Driver" />
        ...
    </bean>
    <!-- spring 配置 C3p0 连接池，需导入C3p0所需jar包 -->
    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
-   	<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+       <property name="driverClassName" value="com.mysql.jdbc.Driver" />
        ...
    </bean>
    ```
@@ -678,7 +678,7 @@ Spring 提供了很多持久层技术的模板类简化编程
    ```xml
    <!-- 方式一 -->
    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-   	<porperty name="location" value="classpath:jdbc.properties" />
+       <porperty name="location" value="classpath:jdbc.properties" />
    </bean>
    <!-- 方式二 -->
    <context:property-placeholder location="classpath:jdbc.properties" />
