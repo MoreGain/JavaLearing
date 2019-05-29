@@ -84,8 +84,7 @@ Inverse of Control，控制反转；创建对象的方式反转了，从我们�
 
 ###### DI 
 
-Dependency Injection，依赖注入；需要有 IOC 的环境 ，Spring 创建这个类的过程中 ,Spring 将类的依
-赖的属性设置进去
+Dependency Injection，依赖注入；需要有 IOC 的环境 ，Spring 创建这个类的过程中 ,Spring 将类的依赖的属性设置进去
 
 ### ApplicationContext & BeanFactory
 
@@ -400,7 +399,7 @@ spring 插件
 
 ### spring AOP
 
-AOP 最早由 AOP 联盟的组织提出的制定了一套规范 .Spring 将 AOP 思想引入到框架中，必须遵守 AOP 联盟的规范；AOP 解决 OOP 中遇到的一些问题，是 OOP 的延续和扩展；AOP 可以在不修改源码的情况下对程序进行增强 ，例如进行权限校验、日志记录、性能监控、事务控制等
+AOP 最早由 AOP 联盟的组织提出的制定了一套规范 ，Spring 将 AOP 思想引入到框架中，必须遵守 AOP 联盟的规范；AOP 解决 OOP 中遇到的一些问题，是 OOP 的延续和扩展；AOP 可以在不修改源码的情况下对程序进行增强 ，例如进行权限校验、日志记录、性能监控、事务控制等
 
 AOP 思想：横向重复，纵向抽取；Filter、动态代理、struts 中的拦截器其实都使用了 AOP 思想
 
@@ -476,7 +475,7 @@ public class MyCglibProxy implements MethodInterceptor {
 
 Joinpoint(连接点): 目标对象中，所有可以增强的方法
 
-Pointcut(切入点): 目标对象中，已经增强的方法
+Pointcut(切入点): 目标对象中，已经或将要增强的方法
 
 Advice(通知/增强): 增强的代码（例如事务的开启与关闭，将通知切入连接点）
 
@@ -606,6 +605,61 @@ public class MyAdvice{
     public void before(){...}
 }
 ```
+
+###### 使用代理工厂配置 AOP
+
+每种通知需要实现通知类
+
+> 前置通知----> `org.springframework.aop.MethodBeforeAdvice`
+>
+> 后置通知----> `org.springframework.aop.AfterReturningAdvice`
+>
+> 环绕通知----> `org.aopalliance.intercept.MethodInterceptor`
+>
+> 异常通知----> `org.springframework.aop.ThrowsAdvice`
+
+配置代理工厂
+
+```xml
+<bean id="aopfactory" class="org.springframework.aop.framework.ProxyFactoryBean">
+    <!-- 加入目标对象，获取到目标对象的名称 -->
+    <property name="targetName" value="target"></property>
+    <!-- 注入通知对象 -->
+    <property name="interceptorNames" value="myBeforeAdvice"></property>
+</bean>
+```
+
+```xml
+<!-- 通过顾问指定那些方法需要代理
+    org.springframework.aop.support.NameMatchMethodPointcutAdvisor
+    org.springframework.aop.support.RegexpMethodPointcutAdvisor
+-->
+<bean id="advisor" class="org.springframework.aop.support.NameMatchMethodPointcutAdvisor">
+    <property name="advice" ref="beforeAdvice"></property>
+    <property name="mappedName" value="login"></property>
+</bean>
+<!-- 代理工厂对象，生成目标代理 -->
+<bean id="aopfactory" class="org.springframework.aop.framework.ProxyFactoryBean">
+    <!-- 加入目标对象，获取到目标对象的名称 -->
+    <property name="targetName" value="target"></property>
+    <!-- 通过顾问注入通知对象 -->
+    <property name="interceptorNames" value="myAdvisor"></property>
+</bean>
+```
+
+```xml
+<!-- 自动生成代理器解决代码臃肿问题
+    DefaultAdvisorAutoProxyCreator 只针对advisor 不对advice 
+-->
+<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"></bean>
+<!-- bean 名称自动代理生成器 -->
+<bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+    <property name="beanNames" value="target"></property>
+    <property name="interceptorNames" value="advisor,aroundAdvice"></property>
+</bean>
+```
+
+
 
 ### Spring 整合 JDBC
 

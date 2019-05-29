@@ -72,22 +72,21 @@ SqlMapConfig.xml, MyBatis 的全局配置文件，配置了 MyBatis 的运行环
 PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
-	<!-- 和spring整合后 environments配置将废除 -->
-	<environments default="development">
+    <!-- 和spring整合后 environments配置将废除 -->
+    <environments default="development">
         <!-- 运行环境，包含数据源和事务管理器 -->
-		<environment id="development">
-			<!-- 使用jdbc事务管理 -->
-			<transactionManager type="JDBC" />
-			<!-- 数据库连接池 -->
-			<dataSource type="POOLED">
-				<property name="driver" value="com.mysql.jdbc.Driver" />
-				<property name="url"
-					value="jdbc:mysql://localhost:3306/mybatis?characterEncoding=utf-8" />
-				<property name="username" value="root" />
-				<property name="password" value="root" />
-			</dataSource>
-		</environment>
-	</environments>
+        <environment id="development">
+            <!-- 使用jdbc事务管理 -->
+            <transactionManager type="JDBC" />
+            <!-- 数据库连接池 -->
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.jdbc.Driver" />
+                <property name="url" value="jdbc:mysql://localhost:3306/mybatis?characterEncoding=utf-8" />
+                <property name="username" value="root" />
+                <property name="password" value="root" />
+            </dataSource>
+        </environment>
+    </environments>
 </configuration>
 
 ```
@@ -122,7 +121,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 ```xml
 <!-- 在 SqlMapConfig.xml 中加载映射文件 -->
 <mappers>
-	<mapper resource="User.xml" />
+    <mapper resource="User.xml" />
 </mappers>
 ```
 
@@ -152,9 +151,9 @@ User.xml 具体配置信息
 ```xml
 <mapper namespace="user">
     <!-- 
- 	parameterType：指定输入参数类型，mybatis通过ognl从输入对象中获取参数值拼接在sql中
-	resultType：指定输出结果类型，mybatis将sql查询结果的一行记录数据映射为resultType指定类型的对象。如果有多条数据，则分别进行映射，并把对象放到容器List中
-	-->
+        parameterType：指定输入参数类型，mybatis通过ognl从输入对象中获取参数值拼接在sql中
+        resultType：指定输出结果类型，mybatis将sql查询结果的一行记录数据映射为resultType指定类型的对象。如果有多条数据，则分别进行映射，并把对象放到容器List中
+    -->
     <select id="queryUserById" paramerterType="Integer" resultType="com.project.mybatis.pojo.User">
         <!-- #{} 输入参数的占位符，相当于 jdbc 的 ？ -->
     	SELECT * FROM user WHERE id = #{v}
@@ -164,9 +163,9 @@ User.xml 具体配置信息
     <!-- String、Integer等基本类型MyBatis已经进行封装，可不写完整类名 -->
     <select id="queryUserByName" parameterType="String" resultType="com.project.mybatis.pojo.User">
         <!--
-			${}:括号类必须写value，传递的String参数不带引号，可替换为"%"#{}"%"，即使用字符串拼接。${}表示拼接sql串，通过${}可以将parameterType 传入的内容拼接在sql中且不进行jdbc类型转换， ${}可以接收简单类型值或pojo属性值，如果parameterType传输单个简单类型值，${}括号中只能是value。
-			#{}:括号类可写任何值，传递的参数根据需要自动带引号，如必须需要String类型的参数，会自动添加引号。#{}表示一个占位符号，通过#{}可以实现preparedStatement向占位符中设置值，自动进行java类型和jdbc类型转换。#{}可以有效防止sql注入。 #{}可以接收简单类型值或pojo属性值。 如果parameterType传输单个简单类型值，#{}括号中可以是value或其它名称。
-		-->
+            ${}:括号类必须写value，传递的String参数不带引号，可替换为"%"#{}"%"，即使用字符串拼接。${}表示拼接sql串，通过${}可以将parameterType 传入的内容拼接在sql中且不进行jdbc类型转换， ${}可以接收简单类型值或pojo属性值，如果parameterType传输单个简单类型值，${}括号中只能是value。
+            #{}:括号类可写任何值，传递的参数根据需要自动带引号，如必须需要String类型的参数，会自动添加引号。#{}表示一个占位符号，通过#{}可以实现preparedStatement向占位符中设置值，自动进行java类型和jdbc类型转换。#{}可以有效防止sql注入。 #{}可以接收简单类型值或pojo属性值。 如果parameterType传输单个简单类型值，#{}括号中可以是value或其它名称。
+        -->
     	SELECT * FROM user WHERE username LIKE '%${value}%'
     </select>
     
@@ -175,13 +174,13 @@ User.xml 具体配置信息
     <insert id="saveUser" parameterType="com.project.mybatis.pojo.User">
         <!-- 自增主键返回，例如添加的用户需要立即添加订单，则可直接返回用户id到user对象，不需要再去查找id进行user对象封装 -->
         <!-- selectKey 标签实现主键返回 -->
-		<!-- keyColumn:主键对应的表中的哪一列 -->
-		<!-- keyProperty：主键对应的pojo中的哪一个属性 -->
-		<!-- order：设置在执行insert语句前执行查询id的sql，还是在执行insert语句之后执行查询id的sql，自增时再插入数据信息后再添加主键，所以值为after，当使用UUID作为主键时，先插入主键，再插入数据信息，此时应取值为before -->
+        <!-- keyColumn:主键对应的表中的哪一列 -->
+        <!-- keyProperty：主键对应的pojo中的哪一个属性 -->
+        <!-- order：设置在执行insert语句前执行查询id的sql，还是在执行insert语句之后执行查询id的sql，自增时再插入数据信息后再添加主键，所以值为after，当使用UUID作为主键时，先插入主键，再插入数据信息，此时应取值为before -->
         <selectKey keyColumn="id" keyProperty="id" resultType="Integer" order="after">
-        	select last_insert_id()
+            select last_insert_id()
         </selectKey>
-    	insert into user(username,password,gender) values(#{username},#{password},#{gender})
+        insert into user(username,password,gender) values(#{username},#{password},#{gender})
     </insert>
 </mapper>
 ```
@@ -196,7 +195,7 @@ Hibernate对象/关系映射能力强，数据库无关性好，对于关系模�
 
 总之，按照用户的需求在有限的资源环境下只要能做出维护性、扩展性良好的软件架构都是好架构，所以框架只有适合才是最好。
 
-### Mapper 动态代理开发
+### Mapper 动态代理
 
 Mapper接口开发方法只需要程序员编写Mapper接口（相当于Dao接口），由Mybatis框架根据接口定义创建接口的动态代理对象
 
@@ -209,6 +208,16 @@ Mapper接口开发需要遵循以下规范：
 3. Mapper 接口方法的输入参数类型和 mapper.xml 中定义的每个 sql 的 parameterType 的类型相同
 
 4. Mapper 接口方法的输出参数类型和 mapper.xml 中定义的每个 sql 的 resultType 的类型相同
+
+***Mapper 映射器接口中的方法可以重载吗？***
+
+个人理解：
+
+不能重载，其实可以通过映射配置文件中每个 SQL 都具有唯一标识符 id 可以大致判断不能重载，因为 id 一般是唯一的不包含特殊字符
+
+MyBatis 源码分析：
+
+MyBatis 底层通过动态代理生成 Mapper 接口的代理对象，它的寻找策略是全限定类名+方法名，不涉及参数，所以不支持重载
 
 ### MyBaits 核心配置文件
 
@@ -242,7 +251,7 @@ Mapper接口开发需要遵循以下规范：
     
     <environments>
     	<environment>
-        	<transactionManager></transactionManager>
+            <transactionManager></transactionManager>
             <dataSource></dataSource>
         </environment>
     </environments>
@@ -314,7 +323,7 @@ Mapper接口开发需要遵循以下规范：
 ```xml
 <!-- POJO 类中的一个属性是另一个 POJO 类，例如 QueryVo POJO 类中有一个属性为 User 类-->
 <select id="findUserByName" parameterType="QueryVo" resultType="user">
-	select * from user where username like '%${user.username}%'
+    select * from user where username like '%${user.username}%'
 </select>
 ```
 
@@ -324,7 +333,7 @@ Mapper接口开发需要遵循以下规范：
 
 ```xml
 <select id="findUserCount" resultType="int">
-	select count(1) from user
+    select count(1) from user
 </select>
 ```
 
@@ -347,7 +356,8 @@ resultType 可以指定将查询结果映射为 pojo，但需要 pojo 的属性�
         <!-- 单表查询可以将属性名与表列名相同的属性省略，但多表查询时必须书写完整，否则省略不能映射成功 -->
         <result property="password" column="password" />
     </resultMap>
-	<select id="findUserById" parameterType="Integer" resultMap="userResultMap">
+    
+    <select id="findUserById" parameterType="Integer" resultMap="userResultMap">
         select * from user where id = #{value}
     </select>
 </mapper>
@@ -387,19 +397,19 @@ public class Order {
 </select>
 <resultMap type="order" id="orderUser">
     <!-- 配置订单对象本身的属性，关联关系映射中，必须显示配置所有字段与列的对应关系，即使命名相同 -->
-	<id property="id" column="id" />
-	<result property="orderName" column="orderName" />
-	<result property="number" column="number" />
+    <id property="id" column="id" />
+    <result property="orderName" column="orderName" />
+    <result property="number" column="number" />
 
-	<!-- association ：配置一对一属性 -->
-	<!-- property:order里面的User属性名 -->
-	<!-- javaType:关联对象的属性类型，使用全限定类名指定 -->
-	<association property="user" javaType="user">
-		<!-- id:声明主键，表示user_id是关联查询对象的唯一标识-->
-		<id property="id" column="user_id" />
-		<result property="username" column="username" />
-		<result property="address" column="address" />
-	</association>
+    <!-- association ：配置一对一属性 -->
+    <!-- property:order里面的User属性名 -->
+    <!-- javaType:关联对象的属性类型，使用全限定类名指定 -->
+    <association property="user" javaType="user">
+        <!-- id:声明主键，表示user_id是关联查询对象的唯一标识-->
+        <id property="id" column="user_id" />
+        <result property="username" column="username" />
+        <result property="address" column="address" />
+    </association>
 </resultMap
 ```
 
@@ -409,17 +419,17 @@ public class Order {
 
 ```xml
 <resultMap type="user" id="userOrderResultMap">
-	<id property="id" column="id" />
-	<result property="username" column="username" />
-	<result property="birthday" column="birthday" />
-	<result property="sex" column="sex" />
-	<result property="address" column="address" />
+    <id property="id" column="id" />
+    <result property="username" column="username" />
+    <result property="birthday" column="birthday" />
+    <result property="sex" column="sex" />
+    <result property="address" column="address" />
 
-	<!-- 配置一对多的关系，通过 ofType 属性自动集合泛型 -->
-	<collection property="orders" javaType="list" ofType="order">
-		<!-- 配置主键，是关联Order的唯一标识 -->
-		<id property="id" column="oid" />
-		<result property="number" column="number" />
+    <!-- 配置一对多的关系，通过 ofType 属性自动集合泛型 -->
+    <collection property="orders" javaType="list" ofType="order">
+        <!-- 配置主键，是关联Order的唯一标识 -->
+        <id property="id" column="oid" />
+        <result property="number" column="number" />
 	</collection>
 </resultMap>
 ```
@@ -456,7 +466,7 @@ publc class Course {
 
 ```xml
 <select id="selectUserByUser" parameterType="user" resultType="user">
-	select id,username,password from user
+    select id,username,password from user
     where 1=1
     <if test="username!=null and username!=''">
     	and username like '%${username}%'
@@ -474,16 +484,16 @@ publc class Course {
 ```xml
 <!-- 存在名字根据名字查，否则根据价格查，都为空根据描述查 -->
 <select id="selectProduct" parameterType="Product" parameterType="Product">
-	select * from product where
+    select * from product where
     <choose>
         <when test="pname!=null">
-        	name=#{name}
+            name=#{name}
         </when>
         <when test="price!=0">
-        	price=#{price}
+            price=#{price}
         </when>
         <otherwise>
-        	desc=#{desc}
+            desc=#{desc}
         </otherwise>
     </choose>
 </select>
@@ -493,7 +503,7 @@ publc class Course {
 
 ```xml
 <select id="fingUserByUser" parameterType="user" resultType="user">
-	select id,username,password from user
+    select id,username,password from user
     <!-- where 元素只会在至少有一个子元素的条件返回 SQL 子句的情况下才去插入“WHERE”子句，而且，若语句的开头为“AND”或“OR”，where 元素也会将它们去除，这样可以不再添加1=1这样的条件去解决多and的问题 -->
     <where>
         <if test="username!=null and username!=''">
@@ -512,14 +522,14 @@ publc class Course {
 
 ```xml
 <update id="">
-	update Author
+    update Author
     <set>
-	    <if test="username != null">username=#{username},</if>
-	    <if test="password != null">password=#{password},</if>
-	    <if test="email != null">email=#{email},</if>
-	    <if test="bio != null">bio=#{bio}</if>
-	</set>
-	where id=#{id}
+        <if test="username != null">username=#{username},</if>
+        <if test="password != null">password=#{password},</if>
+        <if test="email != null">email=#{email},</if>
+        <if test="bio != null">bio=#{bio}</if>
+    </set>
+    where id=#{id}
 </update>
 ```
 
@@ -552,19 +562,18 @@ publc class Course {
 ```xml
 <!-- 例如在 QueryVo 中包含ids的集合，根据ids查询用户 -->
 <select id="queryUserByIds" parameterType="queryVo" resultType="user">
-	SELECT * FROM user
-	<where>
-		<!-- foreach标签，进行遍历 -->
-		<!-- collection：遍历的集合，这里是QueryVo的ids属性 -->
-		<!-- item：遍历的项目，可以随便写，，但是和后面的#{}里面要一致 -->
-		<!-- open：在前面添加的sql片段 -->
-		<!-- close：在结尾处添加的sql片段 -->
-		<!-- separator：指定遍历的元素之间使用的分隔符 -->
-		<foreach collection="ids" item="item" open="id IN (" close=")"
-			separator=",">
-			#{item}
-		</foreach>
-	</where>
+    SELECT * FROM user
+    <where>
+        <!-- foreach标签，进行遍历 -->
+        <!-- collection：遍历的集合，这里是QueryVo的ids属性 -->
+        <!-- item：遍历的项目，可以随便写，，但是和后面的#{}里面要一致 -->
+        <!-- open：在前面添加的sql片段 -->
+        <!-- close：在结尾处添加的sql片段 -->
+        <!-- separator：指定遍历的元素之间使用的分隔符 -->
+        <foreach collection="ids" item="item" open="id IN (" close=")" separator=",">
+            #{item}
+        </foreach>
+    </where>
 </select>
 ```
 
@@ -587,11 +596,11 @@ publc class Course {
 ```xml
 <!-- sql片段可将重复的sql提取出来，使用时用include引用即可，最终达到sql重用的目的 -->
 <sql id="selectSql">
-	select * from user
+    select * from user
 </sql>
 <select id="findUserById" parameterType="Integer" resultType="user">
     <!-- 如果要使用别的Mapper.xml配置的sql片段，可以在refid前面加上对应的Mapper.xml的namespace -->
-	<include refid="selectSql" />
+    <include refid="selectSql" />
     where id = #{v}
 </select>
 ```
@@ -657,14 +666,14 @@ UserMapper 有一个二级缓存区域（按 namespace 分），其它 mapper �
 ```xml
 <!-- 在主配置文件中打开二级缓存总开关 -->
 <settings>
-	<setting name="cacheEnabled" value="true" />
+    <setting name="cacheEnabled" value="true" />
 </settings>
 ```
 
 ```xml
 <!-- 在需要开启二级缓存的 mapper.xml 中加入 cache 标签 -->
 <mapper>
-	<cache></cache>
+    <cache></cache>
 </mapper>
 ```
 
@@ -676,7 +685,6 @@ public class Student implements Serializable {}
 何时使用二级缓存
 
 对于查询多 commit 少且用户对查询结果实时性要求不高，此时采用 mybatis 二级缓存技术可以降低数据库访问量，提高访问速度；但是二级缓存也存在着弊端，二级缓存是建立在同一个 namespace 下的，如果对表的操作查询可能有多个 namespace，那么得到的数据就是错误的
-<<<<<<< HEAD
 
 注意：二级缓存是事务性的。这意味着，当 SqlSession 完成并提交时，或是完成并回滚，但没有执行 flushCache=true 的 insert/delete/update 语句时，缓存会获得更新。
 
