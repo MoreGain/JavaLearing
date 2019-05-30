@@ -487,7 +487,7 @@ Proxy(代理): 将通知织入到目标对象后，形成代理对象
 
 Aspect(切面): 切入点+通知
 
-###### spring 中使用 AOP 
+###### AspectJ 中的 AOP
 
 1. 导包
 
@@ -606,7 +606,7 @@ public class MyAdvice{
 }
 ```
 
-###### 使用代理工厂配置 AOP
+###### Spring 中使用代理工厂配置 AOP
 
 每种通知需要实现通知类
 
@@ -752,7 +752,7 @@ spring 封装了事务管理代码，打开事务，提交事务，回滚事务
 
 使用 spring 管理事务，最核心的对象就是 `TransactionManager` 
 
-spring 管理事务的属性
+###### spring 管理事务的属性
 
 1. 事务的隔离级别
 
@@ -778,10 +778,191 @@ spring 管理事务的属性
 
    PROPAGATION_NESTED	如果当前事务存在，则嵌套事务执行
 
-spring 管理事务的三种方式
+###### spring 管理事务的三种方式
 
-1. 编码式
+使用转账环境，搭建环境如下
+
+```java
+//账户业务层接口
+public interface AccountService {
+    void transfer(String send, String recive, Double money);
+}
+//账户业务接口具体实现
+public class AccountServiceImpl implements AccountService {
+    //业务层注入accountDao
+    public AccountDao accountDao;
+    //提供get方法，spring使用set方法注入
+    public void setAccountDao(AccountDao accountDao) {
+        this.accountDao = accountDao;
+    }
+    //此时没有开启事务管理
+    public void transfer(String send, String recive, Double money) {
+        accountDao.subtractMoney(send, money);
+        accountDao.addMoney(recive, money);
+    }
+}
+```
+
+```java
+//账户持久层接口
+public interface AccountDao {
+    int addMoney(String recive, Double money);
+    int subtract(String send, Double money);
+}
+//账户持久层实现，继承自JdbcDaoSupport需要注入DataSource或JdbcTemplate
+public class AccountDaoImpl extends JdbcDaoSupport implements AccountDao {
+    public int addMoney(String recive, Double money) {
+        String sql = "update account set money=money+? where name=?";
+        this.getJdbcTemplate.update(sql, money, recive);
+    }
+    public int subtractMoney(String send, Double money) {
+        String sql = "update account set money=money+? where name=?";
+        this.getJdbcTemplate.update(sql, money, send);
+    }
+}
+```
+
+```xml
+<!-- 将对象注入spring容器 -->
+<bean id="accountServiceImpl" class="com.project.service.AccountServiceImpl">
+	<property name="accountDao" ref="accountDaImpl"></property>
+</bean>
+<bean id="accountServiceImpl" class="com.project.dao.AccountDaoImpl">
+	<property name="dataSource" ref="dataSource"></property>
+</bean>
+<bean id="dataSource" ...></bean>
+```
+
+
+
+1. 编码式管理事务
+
+   ```xml
+   <!-- 配置事务管理器 -->
+   <bean id="transactionManager" class="org.springframework.jdbc.dataSource.DataSourceTransactionManager">
+       <property name="dataSource" ref="dataSource"></property>
+   </bean>
+   <!-- 配置事务管理模板 -->
+   <bean id="transactionTemplate" class="org.springframework.transaction.support.TransactionTemplate">
+       <property name="transactionManager" ref="transactionManager"></property>
+   </bean>
+   <!-- 在业务层注入事务管理模板 -->
+   <bean id="accountServiceImpl" class="com.project.service.AccountServiceImpl">
+   	<property name="accountDao" ref="accountDaImpl"></property>
+       <!-- 需要注入DateSource或JdbcTemplate -->
+       <property name="dataSource" ref="dataSource"></property>
+       <!-- 注入事务管理模板 -->
+       <property name="transactionTemplate" ref="transactionTemplate"></property>
+   </bean>
+   ```
+
+   编码式事务管理代码实现
+
+   ```java
+   public void transfer(final String send, final String recive, final Double money) {
+       transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+           protected void doInTransactionWithoutResult(TransactionStatus status) {
+               accountDao.sutractMoney(send, money);
+               accountDao.addMoney(recive, money);
+           }
+       })
+   }
+   ```
+
+2. 声明式事务管理 XML 方式，使用 aspectJ 的 xml 方式(AOP 思想)
+
+   此方式不需要进行手动编写代码，通过一段配置完成事务管理
+
+   需要导入的包
+
+   > aop联盟.jar
+   >
+   > spring-aop.jar
+   >
+   > aspectJ.jar
+   >
+   > spring-aspects.jar
+
+   配置事务管理器
+
+   ```xml
+   <!-- 配置事务管理器 -->
+   <bean id="transactionManager" class="org.springframework.jdbc.dataSource.DataSourceTransactionManager">
+       <property name="dataSource" ref="dataSource"></property>
+   </bean>
+   ```
+
+   配置事务的通知
+
+   ```xml
+   <!-- 配置事务的增强 -->
+   <tx:advice id="txAdvice" transaction-manager="transactionManager">
+       <tx:attributes>
+           <!-- 
+               isolation="DEFAULT"	隔离级别
+               propagetion="REQUIRED"	传播行为
+               read-only="false"	只读
+               rollback-for=""	-Exception
+               no-rollback-for=""	+Exception
+           -->
+   	    <tx:method name="transfer" propagetion="REQUIRED"></tx:method>
+       </tx:attributes>
+   </tx:advice>
+   ```
+
+   配置 AOP 事务
+
+   ```xml
+   <aop:config>
+       <aop:pointcut id="pointcut" expression="execution(* com.project.service.serviceImpl.AccountServcieImpl.transfer(..))"></aop:pointcut>
+       <aop:advisor advice-ref="txAdvice" pointcut-ref="pointcut"></aop:advisor>
+   </aop:config>
+   ```
+
+3. 声明式事务管理注解方式
+
+   配置事务管理器
+
+   ```xml
+   <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+       <property name="dataSource" ref="dataSource"></property>
+   </bean>
+   ```
+
+   开启事务管理的注解
+
+   ```xml
+   <tx:annotation-driven transaction-manager="transactionManager" />
+   ```
+
+   在使用事务的类上添加注解
+
+   ```java
+   @Transactional
+   public class AccountServiceImpl implements AccountService {}
+   ```
+
+4. 基于 TransactionProxyFactoryBean 的声明式事务
+
+   配置数据源
+
+   配置事务管理器
+
+   配置事务代理工厂
+
+   ```xml
+   <!-- 事务代理工厂 -->
+   <bean id="serviceProxy" class="org.springframework.transaction.interceptor.TransactionproxyFactoryBean">
+       <!-- 目标对象 -->
+       <property name="target" ref="accountServiceImpl"></property>
+       <!-- 事务管理器 -->
+       <property name="transactionManager" ref="transactionManager"></property>
+       <property name="transactionAttributes">
+       	<props>
+           	<prop key="transfer">ISOLATION_DEFAULT,PROPAGATION_REQUIRED</prop>
+           </props>
+       </property>
+   </bean>
+   ```
 
    
-
-2. 

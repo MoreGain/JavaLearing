@@ -102,7 +102,7 @@ WAL(write-ahead logging)
 
 InnoDB: update-->redo log-->update memory-->wirte to disk(free time)
 
-write pos, chickpoint
+write pos, checkpoint
 
 crash-safe
 
