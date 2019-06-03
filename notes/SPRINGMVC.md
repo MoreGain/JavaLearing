@@ -1,6 +1,6 @@
 # SPRINGMVC
 
-### 入门案例
+### 入门案例(注解方式)
 
 ###### 配置前端控制器
 
@@ -57,6 +57,30 @@ public class BookController {
         return mad;
     }
 }
+```
+
+入门案例配置方式
+
+```xml
+<!-- 配置处理器映射器 -->
+<bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping"></bean>
+<!-- 配置方式二，简单url映射，集中配置bean的id对应的url,这种方式的controller需要实现HttpRequestHandler接口，类似于传统servlet开发 -->
+<bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+    <property name="mappings">
+        <props>
+            <prop key="/addUser.do">UserController</prop>
+            <prop key="/addTeacher.do">TeacherController</prop>
+        </props>
+    </property>
+</bean>
+<!-- 配置处理器适配器 -->
+<bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter"></bean>
+<!-- 配置方式二的处理器适配器 -->
+<bean class="org.springframework.web.servlet.mvc.method.annotation.HttpRequestHnadlerAdapter"></bean>
+<!-- 配置视图解析器 -->
+<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"></bean>
+<!-- 配置controller,这种方式的controller需要实现Controller接口 -->
+<bean name="/addUser.do" class="org.project.controller.UserController"></bean>
 ```
 
 ### springmvc 架构
@@ -256,6 +280,27 @@ public class DateConverter implements Converter<String, Date> {
 </bean>
 ```
 
+设置日期转换格式的另一种方式
+
+```java
+//在controller中重写以下方法
+@InitBinder
+public void initBinder(WebDataBinder binder) {
+    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+    //是否严格解析日期
+    format.setLenient(false);
+    binder.registerCustomEditor(Date.class, new CustomDateEditor(format, true));
+}
+```
+
+###### 高级参数绑定
+
+数组类型：controller 方法中可以接受数组参数，或者 POJO 对象中的数组属性
+
+List 类型：接收 List 类型的数据必须是 POJO 的属性，如果方法的形参为 ArrayList 类型无法正确接收到数据；input 标签的 name 属性必须为 `list属性名+下标+元素属性` 
+
+*自我提问：Set 类型如何绑定? Map 类型如何绑定?*
+
 ### springmvc 与 strust2 区别
 
 springmvc 的入口是一个 servlet 即前端控制器，而 struts2 入口是一个 filter 过滤器
@@ -263,3 +308,289 @@ springmvc 的入口是一个 servlet 即前端控制器，而 struts2 入口是�
 springmvc 是基于方法开发(一个url对应一个方法)，请求参数传递到方法的形参，可以设计为单例(多线程，为每个请求创建方法副本)或多例(创建类的副本，建议单例)，struts2 是基于类开发，传递参数是通过类的属性，只能设计为多例
 
 Struts 采用值栈存储请求和响应的数据，通过 OGNL 存取数据， springmvc 通过参数解析器是将 request 请求内容解析，并给方法形参赋值，将数据和视图封装成 ModelAndView 对象，最后又将 ModelAndView 中的模型数据通过 request 域传输到页面，Jsp 视图解析器默认使用 jstl
+
+
+
+### @RequestMapping 
+
+此注解的 value 值为一个数据，即可以将多个 url 映射到同一个方法
+
+可以添加在类上，限定类下的所有方法请求 url 的请求前缀
+
+```java
+@RequestMapping("/user")
+public class UserController{...}
+```
+
+请求方法限定，可以对 url 设置限定请求进来的方法
+
+```java
+//限定请求方式为GET, 此时如果通过Post方式访问则会报错
+@RequestMapping(value="/findUser.do",method=RequestMethod.GET)
+//@RequestMapping(method={RequestMethod.GET, RequestMethod.POST})
+public ModelAndView findUser(){...}
+```
+
+
+
+### Controller 方法返回值
+
+###### 返回 ModelAndView 对象
+
+方法中定义 ModelAndView 对象并返回，对象中可以添加 model 数据、指定 view
+
+###### 返回 void
+
+使用 request、response 指定响应结果，例如转发、重定向、发送 json 数据
+
+###### 返回字符串
+
+请求转发
+
+```java
+return "forward:/user.jsp"
+```
+
+重定向
+
+```java
+return "redirect:/user.jsp"
+```
+
+
+
+### 异常处理器
+
+系统中异常包括两类：预期异常和运行时异常 RuntimeException，前者通过捕获异常从而获取异常信息，后者主要通过规范代码开发、测试通过手段减少运行时异常的发生
+
+系统的 dao、service、controller 出现都通过 throws Exception 向上抛出，最后由 springmvc 前端控制器交由异常处理器进行异常处理；为了区别不同的异常，通常根据异常类型进行区分，我们创建一个自定义系统异常，如果 controller、service、dao 抛出此类异常说明是系统预期处理的异常信息
+
+```java
+//自定义异常
+public class MyException {
+    //异常信息
+    public String message;
+    public MyException() {}
+    public MyException(String message) {this.message = message;}
+    public String getMessage(){return message;}
+    public void SetMessage(String message) {this.message = message};
+}
+```
+
+自定义异常处理器
+
+```java
+public class CustomHandlerException implements HandlerExceptionResolver {
+    public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception exception) {
+        //定义异常信息
+        String msg;
+        //判断异常类型
+        if(exception instanceof MyException) {
+            //如果是自定义异常，获得异常信息
+            msg = exception.getMessage();
+        } else {
+            //如果是运行时异常，则取错误堆栈，从堆栈中获取异常信息
+            Writer out = new StringWriter();
+            PrintWriter s = new PrintWriter(out);
+            exception.printStackTrace(s);
+            msg = out.toString();
+        }
+        
+        //把错误信息发给相关人员，邮件，短信等
+        
+        //返回错误页面，给用户友好页面显示错误信息
+        ModelAndView model = new ModelAndView();
+        model.addObject("msg",msg);
+        model.setViewName("error.jsp");
+        return model;
+    }
+}
+```
+
+###### 异常处理器配置
+
+```xml
+<!-- 配置全局异常处理器 -->
+<bean id="customHandlerException" class="com.project.exception.CustomHandlerException"></bean>
+```
+
+
+
+### 图片上传
+
+###### 上传图片需要的 jar 包
+
+> commons-fileupload.jar
+>
+> commons-io.jar
+
+###### 配置上传解析器
+
+```xml
+<!-- 文件上传，id必须设置为multipartResolver -->
+<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+    <!-- 设置文件上传大小 -->
+    <property name="maxUploadSize" value="500000"></property>
+</bean>
+```
+
+###### 页面确认
+
+上传图片表单必须添加 enctype 属性
+
+```html
+<!-- 设置数据以二进制格式传输 -->
+<form enctype="multipart/form-data"></form>
+```
+
+###### 图片上传逻辑
+
+```java
+//更新商品图片逻辑
+@RequestMapping("/update.do")
+public String updateProductById(Product product, MultipartFile pictureFile) throws Exception {
+    //设置图片名称，不能重复，使用 UUID
+    String picName = UUID.randomUUID().toString();
+    //获取文件名
+    String oriName = pictureFile.getOriginalFilename();
+    //获取图片后缀
+    String extName = oriName.subString(oriName.lastIndexOf("."));
+    
+    //开始上传
+    pictureFile.transferTo(new File("C:/upload/image"+picName+extName));
+    
+    //设置图片名到商品
+    product.setPicture(picName+extName);
+    //更新商品
+    this.productService.updateProductById(product);
+    return "forward:productEdit.action";
+}
+```
+
+###### 可以在 tomcat 上配置虚拟目录
+
+修改 server.xml 配置文件，也可在 eclipse 中配置
+
+```xml
+<!-- 访问 http://localhost:8080/pic 即可访问 C:\upload\image -->
+<context docBase="C:\upload\image" path="/pic" reloadable="false" />
+```
+
+
+
+### JSON 数据交互
+
+###### @RequestBody
+
+此注解用于读取 http 请求(字符串)的内容，通过 HttpMessageConverter 接口将读取到的内容(JSON)转换为 java 对象并绑定到 controller 方法的参数上
+
+以前的参数格式 `?name=zhangsan&password=123`
+
+现在的参数格式
+
+```json
+{
+    name: zhangsan,
+    password: 123
+}
+```
+
+###### @ResponseBody
+
+此注解用于将 controller 方法的返回对象，通过 HttpMessageConverter 接口转换为指定格式的数据，如 json、xml 等，通过 response 响应给客户
+
+###### 配置 JSON 转换器
+
+如果未使用注解驱动，则需要给处理器适配器配置 json 转换器
+
+```xml
+<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+    <property name="messageConverters">
+        <list>
+            <bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter"></bean>
+        </list>
+    </property>
+</bean>
+```
+
+
+
+### RESTful 
+
+Restful 就是一个资源定位及资源操作的风格，不是标准也不是协议，只是一种风格，基于这个风格设计的软件可以更简洁，更有层次，更易于实现缓存等机制
+
+资源：互联网所有的事物都可以被抽象为资源
+
+资源操作：使用 POST、DELETE、PUT、GET，使用不同方法对资源进行操作，分别对应添加、 删除、修改、查询
+
+传统操作：
+
+> `http://127.0.0.1/item/queryItem.action?id=1`     查询GET
+>
+> `http://127.0.0.1/item/saveItem.action`               新增POST
+>
+> `http://127.0.0.1/item/updateItem.action`           更新POST
+>
+> `http://127.0.0.1/item/deleteItem.action?id=1`    删除GET或POST
+
+使用 Restful 操作资源
+
+> `http://127.0.0.1/item/1`           查询GET
+>
+> `http://127.0.0.1/item`        新增POST
+>
+> `http://127.0.0.1/item`        更新PUT
+>
+> `http://127.0.0.1/item/1`           删除DELETE
+
+使用 RESTful 风格开发根据 id 查询商品的接口，请求地址为 `http:127.0.0.1/product/1`
+
+```java
+@RequestMapping("product/{id}")
+//@ResponseBody
+public @ResponseBody Product queryProductById(@PathVaribale("id") Integer id) {...}
+```
+
+
+
+### 拦截器
+
+springmvc 中的处理器拦截器与 filter 类似，用于对处理器进行预处理和后处理
+
+###### 定义拦截器
+
+```java
+public class HandlerInterceptor1 implements HandlerInterceptor {
+    //controller执行并返回视图后调用，可以得到执行controller时的异常信息，记录操作日志等
+    public void afterCompletion(){...}
+    //controller执行未返回视图前调用，可以在返回用户前对模型数据进行加工处理
+    public void postHandler() {...}
+    //controller执行前调用，返回true继续执行，返回false中止执行，可以进行登录校验、权限拦截等
+    public boolean preHandler() {...}
+}
+```
+
+###### 配置拦截器
+
+```xml
+<mvc:interceptors>
+    <mvc:interceptor>
+        <!-- 所有的请求都进入拦截器 -->
+        <mvc:mapping path="/**"></mvc:mapping>
+        <!-- 具体的拦截器 -->
+        <bean class="com.project.intercaptor.HandlerInterceptor1"></bean>
+    </mvc:interceptor>
+    <mvc:interceptor>...</mvc:interceptor>
+</mvc:interceptors>
+```
+
+拦截器执行顺序
+
+> preHandler 按拦截器定义顺序调用
+>
+> postHandler 按拦截器定义逆序调用
+>
+> afterCompletion 按拦截器定义逆序调用
+
+postHandler 在拦截器链内所有拦截器返回成功调用，afterCompletion 只有 preHandler 返回 true 才调用
+
