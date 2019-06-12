@@ -16,6 +16,7 @@
 - [Hibernate](notes/HIBERNATE.md)
 - [Spring](notes/SPRING.md)
 - [MyBatis](notes/MYBATIS.md)
+- [SpringMVC](../notes/SPRINGMVC.md)
 
 ## 数据库
 
@@ -42,3 +43,5 @@
 ## 工具
 
 - [Git](notes/Git.md)
+- [Maven](../notes/MAVEN.md)
+

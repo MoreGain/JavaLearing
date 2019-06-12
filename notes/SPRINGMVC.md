@@ -1,5 +1,7 @@
 # SPRINGMVC
 
+[TOC]
+
 ### 入门案例(注解方式)
 
 ###### 配置前端控制器
@@ -313,7 +315,7 @@ Struts 采用值栈存储请求和响应的数据，通过 OGNL 存取数据， 
 
 ### @RequestMapping 
 
-此注解的 value 值为一个数据，即可以将多个 url 映射到同一个方法
+此注解的 value 值为一个数组，即可以将多个 url 映射到同一个方法
 
 可以添加在类上，限定类下的所有方法请求 url 的请求前缀
 
@@ -367,7 +369,7 @@ return "redirect:/user.jsp"
 
 ```java
 //自定义异常
-public class MyException {
+public class MyException extends Exception {
     //异常信息
     public String message;
     public MyException() {}
@@ -453,7 +455,7 @@ public String updateProductById(Product product, MultipartFile pictureFile) thro
     String picName = UUID.randomUUID().toString();
     //获取文件名
     String oriName = pictureFile.getOriginalFilename();
-    //获取图片后缀
+    //获取图片后缀	FileUtils.extension(oriname);---->jpg
     String extName = oriName.subString(oriName.lastIndexOf("."));
     
     //开始上传
@@ -507,7 +509,7 @@ public String updateProductById(Product product, MultipartFile pictureFile) thro
 <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
     <property name="messageConverters">
         <list>
-            <bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter"></bean>
+            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter"></bean>
         </list>
     </property>
 </bean>
