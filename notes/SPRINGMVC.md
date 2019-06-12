@@ -383,6 +383,7 @@ public class MyException extends Exception {
 
 ```java
 public class CustomHandlerException implements HandlerExceptionResolver {
+    //handler发生异常的地方，包名+类名+方法名（形参）
     public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception exception) {
         //定义异常信息
         String msg;
@@ -429,7 +430,8 @@ public class CustomHandlerException implements HandlerExceptionResolver {
 ###### 配置上传解析器
 
 ```xml
-<!-- 文件上传，id必须设置为multipartResolver -->
+<!-- MultipartFile为一个接口，需要再容器中配置实现类 -->
+<!-- 文件上传实现类，id必须设置为multipartResolver，spring靠名字找到此实现类 -->
 <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
     <!-- 设置文件上传大小 -->
     <property name="maxUploadSize" value="500000"></property>
