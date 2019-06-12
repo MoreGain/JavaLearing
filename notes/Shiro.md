@@ -533,3 +533,9 @@ void delete(Session session);
 Collection<Session> getActiveSessions();  
 ```
 
+
+
+
+
+### 缓存机制
+
