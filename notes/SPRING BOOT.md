@@ -1,5 +1,9 @@
 # SPRING BOOT
 
+
+
+## Spring Boot 实战
+
 ### 概述
 
 ###### spring 精要
@@ -136,3 +140,71 @@ Spring Boot自动配置的Bean提供了300多个用于微调的属性。当你�
 ###### 定制错误页面
 
 Spring Boot 自动配置的默认错误处理器会查找名为 error 的视图，如果找不到就用默认的白标错误视图，因此，最简单的方法就是创建一个自定义视图，让解析出的视图名为 error
+
+
+
+
+
+### 测试
+
+###### 集成测试自动配置
+
+使用 @SpringApplicationConfiguration 代替 @ContextConfiguration
+
+###### web 测试
+
+*Spring Mock MVC 测试*
+
+> MockMvcBuilders.standaloneSetup(): 构建一个 Mock MVC，提供一个或多个手工创建并配置的控制器
+>
+> MockMvcBuilders.webAppContextSetup(): 使用 Spring 应用程序上下文来构建 Mock MVC，该上下文里可以包含一个或多个配置好的控制器
+
+*Web 服务器测试*
+
+使用 Spring Boot 的嵌入式 servlet 容器启动应用，使用 @WebIntegrationTest(randomPort=true)，使用 RestTemplate 对应用程序发起 HTTP 请求
+
+Selenium 测试
+
+
+
+
+
+
+
+
+
+### @Bean 
+
+@Bean 是一个方法级别上的注解，主要用在 @Configuration 注解的类里，也可以用在 @Component 注解的类里。添加的 bean 的 id 为方法名，默认情况下 bean 的名称和方法名称相同，你也可以使用 name 属性来指定
+
+```java
+@Configuration
+public class ShiroCoinfig {
+    @Bean
+    public MyRealm myRealm(){
+        return new MyRealm();
+    }
+}
+```
+
+@Bean 也可以依赖其他任意数量的 bean，通过方法参数传递
+
+```java
+@Configuration
+public class ShiroConfig {
+    @Bean
+    public SecurityManager securityManager(MyRealm myRealm) {
+        securityManager.setRealm(myRealm);
+    }
+}
+```
+
+@Bean 定义的 bean，也可以执行生命周期的回调函数，类似 @PostConstruct 和 @PreDestroy的方法，默认使用 javaConfig 配置的 bean，如果存在 close 或者 shutdown 方法，则在 bean 销毁时会自动执行该方法
+
+```java
+@Bean(initMethod = "init", destoryMethod = "clean")
+```
+
+你能够使用 @Scope 注解来指定使用 @Bean 定义的 bean
+
+bean 的描述可以使用 @Description 来提供
