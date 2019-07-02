@@ -447,19 +447,19 @@ public class MyCglibProxy implements MethodInterceptor {
     //生成代理的方法
     public CustomerDao createProxy(){
         // 创建 Cglib 的核心类
-		Enhancer enhancer = new Enhancer();
-		// 设置父类
-		enhancer.setSuperclass(CustomerDao.class);
-		// 设置回调
-		enhancer.setCallback(this);
-		// 生成代理
+        Enhancer enhancer = new Enhancer();
+        // 设置父类
+        enhancer.setSuperclass(CustomerDao.class);
+        // 设置回调
+        enhancer.setCallback(this);
+        // 生成代理
         CustomerDao customerDaoProxy = (CustomerDao)enhancer.careate();
         return customerDaoProxy;
     }
     
     @Override
-	public Object intercept(Object proxy,Method method,Object[] args,MethodProxy methodProxy) throws Throwable {
-         if("delete".equals(method.getName()) {
+    public Object intercept(Object proxy,Method method,Object[] args,MethodProxy methodProxy) throws Throwable {
+        if("delete".equals(method.getName()) {
             Object obj = methodProxy.invokeSuper(proxy, args);
             System.out.println("日志记录");
             return obj;
@@ -525,7 +525,7 @@ Aspect(切面): 切入点+通知
            ...;
            return proceed;
        }
-       //异常拦截通知	如果出现异常则调用
+       //异常拦截通知    如果出现异常则调用
        public void afterException(){...}
        //后置通知	目标方法运行之后调用（无论是否出现异常都会调用）
        public void after(){...}
@@ -848,7 +848,7 @@ public class AccountDaoImpl extends JdbcDaoSupport implements AccountDao {
    </bean>
    <!-- 在业务层注入事务管理模板 -->
    <bean id="accountServiceImpl" class="com.project.service.AccountServiceImpl">
-   	<property name="accountDao" ref="accountDaImpl"></property>
+       <property name="accountDao" ref="accountDaImpl"></property>
        <!-- 需要注入DateSource或JdbcTemplate -->
        <property name="dataSource" ref="dataSource"></property>
        <!-- 注入事务管理模板 -->
@@ -905,7 +905,7 @@ public class AccountDaoImpl extends JdbcDaoSupport implements AccountDao {
                rollback-for=""	-Exception
                no-rollback-for=""	+Exception
            -->
-   	    <tx:method name="transfer" propagetion="REQUIRED"></tx:method>
+           <tx:method name="transfer" propagetion="REQUIRED"></tx:method>
        </tx:attributes>
    </tx:advice>
    ```
@@ -958,8 +958,8 @@ public class AccountDaoImpl extends JdbcDaoSupport implements AccountDao {
        <!-- 事务管理器 -->
        <property name="transactionManager" ref="transactionManager"></property>
        <property name="transactionAttributes">
-       	<props>
-           	<prop key="transfer">ISOLATION_DEFAULT,PROPAGATION_REQUIRED</prop>
+           <props>
+               <prop key="transfer">ISOLATION_DEFAULT,PROPAGATION_REQUIRED</prop>
            </props>
        </property>
    </bean>

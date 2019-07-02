@@ -18,6 +18,7 @@
 - [MyBatis](notes/MYBATIS.md)
 - [SpringMVC](notes/SPRINGMVC.md)
 - [Spring Boot](notes/SPRING%20BOOT.md)
+- [SHIRO](notes/Shiro.md)
 
 ## 数据库
 
