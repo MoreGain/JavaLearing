@@ -9,12 +9,12 @@
 ```xml
 <web-app>
     <!-- springmvc的核心就是前端控制器，它本身给是一个servlet，所以需要在web.xml中进行配置 -->
-	<servlet>
+    <servlet>
     	<servlet-name>springmvc</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
         <!-- 不配置默认找/WEB-INF/[servlet名称]-servlet.xml -->
         <init-param>
-        	<param-name>contextConfigLocation</param-name>
+            <param-name>contextConfigLocation</param-name>
             <param-value>classpath:springmvc.xml</param-value>
         </init-param>
     </servlet>
@@ -22,7 +22,7 @@
     	<servlet-name>springmvc</servlet-name>
         <!--
             /*	过滤所有文件
-            *.do	过滤以 .do 结尾的所有请求
+            *.do  过滤以 .do 结尾的所有请求
             /	过滤除 jsp 以外的所有文件（本人有疑问？）
         -->
         <url-pattern>*.action</url-pattern>
@@ -38,7 +38,7 @@
 <beans>
     <!-- 开启使用组件扫描器，省去在spring容器中配置每个Controller类 -->
     <!-- 配置controller扫描包，多个包用逗号分隔 -->
-	<context:component-scan base-package="com.project.controller"></context:component-scan>
+    <context:component-scan base-package="com.project.controller"></context:component-scan>
 </beans>
 ```
 
