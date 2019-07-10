@@ -966,3 +966,117 @@ public class AccountDaoImpl extends JdbcDaoSupport implements AccountDao {
    ```
 
    
+
+### Spring 4.x 开发实战
+
+Spring 有一个数据转换框架，可以使字符串和 Java 数据类型相互转换，如 @LocalDate 注解
+
+```java
+@RestController
+public class LocalDateController {
+    @RequestMapping("/date/{localDate}")
+    public String get(@DateTimeFormat(iso = ISO.DATE) LocalDate localDate) {
+        return localDate.toString();
+    }
+}
+```
+
+spring 4.0 支持使用重复注解，如使用 @PropertySource 加载不同的配置文件，仅支持 @Scheduled 和 @PropertySource 的重复
+
+```java
+@PropertySource("classpath:/conf1.properties")
+@PropertySource("classpath:/conf2.properties")
+```
+
+空指针终结者 Optional<>，使用场景：可选属性注入，可选参数
+
+```java
+//ud不一定注入，以前的方式
+@Autowired(required = false)
+private UserDao ud;
+
+//现在可使用
+@Autowired
+private Optional<UserDao> ud;
+
+//可选参数
+public User getUser(String id, Optional<String> userName) {}
+```
+
+##### Spring Cache
+
+缓存是一种存储机制，它将数据保存在某个地方，并以一种更快的方式提供服务
+
+web 应用中，不同层级对应的技术选型
+
+![](../images/SpringCache1.jpg)
+
+缓存命中率：缓存中读取次数/总读取次数
+
+过期策略：缓存满了后的移除策略
+
+- FIFO
+- LRU
+- LFU
+- TTL
+- TTI
+
+使用 Spring Cache
+
+- 缓存定义：确定需要缓存的方法和缓存策略
+- 缓存配置：配置缓存
+
+###### 缓存注解
+
+public 方法才可以被缓存
+
+@Cacheable
+
+- value/cacheNames
+- key/keyGenerator
+- condition/unless
+
+@CachePut
+
+执行方法将返回值放入缓存，同一个方法类不能同时使用 @Cacheable 和 @CachePut
+
+@CacheEvict
+
+从给定的缓存中移除一个值，新增两个参数
+
+- allEntries--是否清空所有缓存内容，默认 false
+- beforeInvocation--是否在方法执行前就清空，默认 false，方法抛出异常不清空换粗
+
+@Caching
+
+组注解，可以为一个方法定义基于 @Cacheable @CacheEvict @CachePut 的数组
+
+@CacheConfig
+
+类级别的全局缓存注解
+
+###### 缓存管理器
+
+- SimpleCacheManager
+
+- NoOpCacheManager
+
+  主要用于测试，不缓存任何数据
+
+- ConcurrentMapCacheManager
+
+  使用了 JDK 的ConcurrentMap
+
+- CompositeCacheManager
+
+  将多个缓存管理器定义在一起
+
+SpEL 提供了与 root 对象相关联的缓存特定的内置参数
+
+###### 缓存实战
+
+要实现非 public 方法基于注解的缓存必须采用基于 AspectJ 的 AOP 机制
+
+Spring Cache 的原理是基于动态生成子类的代理机制来对方法的调用进行切面的，所以内部调用(this)会导致代理失效，从而导致切面失效，缓存失效
+
+@CacheEvict 的可靠性，方法运行抛出异常会导致清除缓存失败
