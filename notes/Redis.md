@@ -10,6 +10,18 @@ Redis 以键值对的形式存储数据，键类型只能为字符创，值支�
 set hello world #添加
 get hello #获取
 del hello #删除
+incr key-name
+decr key-name
+incrby key-name amount
+decrby key-name amount
+incrbyfloat key-name amount
+append key-name value
+getrange key-name start end
+setrange key-name offset value
+gitbit key-name offset
+bitcount key-name [start end]
+bitop operation dest-key key-name  [key-name...]
+
 ```
 
 ##### LIST
@@ -23,6 +35,11 @@ lrange list-key 0 -1 #范围获取
 lpop list-key #左删除
 rpop list-key #右删除
 lindex list-key 1 #索引获取元素
+ltrim key-name start end
+blpop key-name [key-name...] timeout
+rlpop key-name [key-name...] timeout
+rpoplpush source-key dest-key
+brpoplpush source-key dest-key timeout
 ```
 
 ##### SET
@@ -34,6 +51,16 @@ sadd set-key a #添加
 smembers set-key #获取所有元素
 srem set-key a #删除
 sismember set-key b #判断元素是否存在
+scard key-name
+srandmember key-name [count]
+spop key-name
+smove source-key dest-key item
+sdiff key-name [key-name...]
+sdiffstore dest-key key-name [key-name...]
+sinter key-name [key-name...]
+sinterstore key-name [key-name...]
+sunion key-name [key-name...]
+sunionstore dest-key key-name [key-name...]
 ```
 
 ##### HASH
@@ -46,6 +73,14 @@ hset hash-key password 123456 #添加
 hgetall hash-key #获取所有键值
 hget hash-key username #获取指定键的值
 hdel hash-key password #删除
+hmget key-name key [key...]
+hmset key-name key value [key value...]
+hlen key-name
+hexists key-name key
+hkeys key-name
+hvals key-name
+hincrby key-name key increment
+hincrbyfloat key-name key increment
 ```
 
 ##### ZSET
@@ -57,10 +92,36 @@ zadd zset-key 9000 dog #添加
 zadd zset-key 70 cat #添加
 zrange zset-key 0 -1 withscores #范围显示
 zrangebyscore zset-key 0 800 withscores #通过分数范围显示
-zrem zset-key dog #显示指定元素
+zrem zset-key dog #删除指定元素
+zcrad key-name
+zincrby key-name increment member
+zcount key-name min max
+zrank key-name member
+zscore key-name member
+zrange key-name start stop [WITHSCORES]
+zrevrank key-name member
+zrevrange key-name start stop [withscores]
+zrangebyscore key min max [withscores]
+zrevrangebyscore key max min [withscores]
+zremrangebyrank key-name start stop
+zremrangebyscore key-name min max
+zinterstore dest-key key-count key [key ...]
+zunion dest-key key-count key [key ...]
 ```
 
-##### Common command
+##### 键的过期时间
+
+```
+persist key-name
+ttl key-name 
+expire key-name seconds
+expireat key-name timestamp
+pttl key-name 
+pexpire key-name milliseconds
+pexpireat key-name timestamp-milliseconds
+```
+
+##### common command
 
 ```
 keys * #列出所有键
