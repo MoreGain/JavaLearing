@@ -43,6 +43,102 @@
 
 - Serial 收集器
 
+  新生代收集器，单线程、Stop the World
+
+- ParNew 收集器
+
+  新生代收集器，同 Serial 收集器，多线程，在单 CPU 环境下效果不如 Serial
+
+  -XX:ParallelGCThreads 限制参与垃圾收集的线程数
+
+- Parallel Scavenge 收集器
+
+  新生代收集器，吞吐量优先收集器，为了达到一个可控制的吞吐量（=运行用户代码时间/(运行用户代码时间+垃圾回收时间)）
+
+  -XX:MaxGCPauseMillis 最大垃圾收集停顿时间
+
+  -XX:GCTimeRatio 吞吐量大小，默认值99
+
+  -XX:+UseAdaptiveSizePolicy 自适应调节策略的开关参数
+
+- Serial Old 收集器
+
+- Parallel Old 收集器
+
+- CMS 收集器
+
+  老年代收集器，Concurrent Mark Sweep, 以获取最短回收停顿时间为目标，使用“标记-清除”算法实现
+
+  运行步骤：
+
+  - 初始标记
+
+    Stop the world, 标记 GC Roots 能直接关联的对象，速度很快
+
+  - 并发标记
+
+    GC Roots Tracing
+
+  - 重新标记
+
+    Stop the world, 修正并发标记期间标记变动的标记记录
+
+  - 并发清除
+
+  被称为并发低停顿收集器，缺点：
+
+  - 对 CPU 资源非常铭感
+
+    会占用一部分线程导致应用程序变慢，当 CPU 小于 4 个时对用户程序的影响可能变得很大
+
+  - CMS 收集器无法处理浮动垃圾
+
+    清理阶段用户线程产生的垃圾无法收集，需要预留足够的内存空间给用户线程使用，可能出现“Concurrent Mode Failure”；CMS 收集器默认在老年代使用了 68% 的空间后就会被激活，设置-XX:CMSInitiatingOccupancyFraction 可提供触发百分比；后备预案：使用 Serial Old 收集器进行老年代的收集，停顿时间很长
+
+  - 标记-清除算法的空间问题
+
+    使用 -XX:UseCMSCompactAtFullCollction 开关参数设置 CMS 收集完成后进行碎片整理；-XX:CMSFullGCBeforeCompaction 设置多少次进行一次压缩的 Full GC
+
+- G1 收集器
+
+  基于“标记-整理”算法实现；可以精确的控制停顿时间，即可以明确指定在 M 毫秒的时间片内消耗在垃圾收集的时间不超过 N 毫秒
+
+  G1 收集器可以实现在基本不牺牲吞吐量的前提下完成低停顿的内存回收，它将 Java 堆划分为多个大小固定的独立区域，跟踪每个区域的垃圾堆积程度，并维护一个优先列表，优先回收垃圾最多的区域
+
+##### 内存分配
+
+- 对象优先在 Eden 分配
+
+  > Minor GC : 新生代的垃圾收集动作，频繁且回收速度快
+  >
+  > Full GC / Major GC : 老年代的 GC， 速度比 Minor GC 慢 10 倍以上
+
+  对象在 Eden 区中分配，空间不足时发起 Minor GC
+
+  -XX:+PrintGCDetails 收集器日志参数
+
+  案例：尝试分配 3 个 2M 和 1 个 4M 的对象，虚拟机参数设置：-Xms20M、-Xmx20M、-Xmn10M、-XX:SurvivorRatio=8，分析内存分配过程。
+
+- 大对象直接进入老年代
+
+  大对象：需要大量连续空间的 Java 对象
+
+  -XX:PretenureSizeThresold 设置大于某个值的对象直接在老年代中分配内存，此参数只对 Serial 和 ParNew 收集器有效
+
+  案例：分配一个 4M 的对象，虚拟机参数设置：-XX:PretenureSizeThreshold=3145278(3M)
+
+- 长期存活的对象进入老年代
+
+  当对象年龄计数器增加到一定程度（默认15岁）时会被晋升到老年代，-XX:MaxTenuringThreshold
+
+- 动态对象年龄判定
+
+  Survivor 空间中相同年龄所有对象大小的总和大于 Survivor 空间的一半，年龄大于或等于该年龄的对象可以直接进入老年区
+
+- 空间分配担保
+
+  发生 Minor GC 时，虚拟机会检测之前每次晋升到老年代的平均大小是否大于老年代的剩余空间，大于则直接进行一次 Full GC，小于则查看 HandlePromotionFailure 设置是否允许担保失败
+
 
 
 ### Java 内存模型与线程

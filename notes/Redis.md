@@ -37,7 +37,7 @@ rpop list-key #右删除
 lindex list-key 1 #索引获取元素
 ltrim key-name start end
 blpop key-name [key-name...] timeout
-rlpop key-name [key-name...] timeout
+brpop key-name [key-name...] timeout
 rpoplpush source-key dest-key
 brpoplpush source-key dest-key timeout
 ```
@@ -295,22 +295,32 @@ typedef struct intset {
 
 ### 三、持久化
 
-##### RDB 持久化
+##### RDB 持久化(快照)
 
-通过保存数据库中的键值对来记录数据库的状态
+通过保存数据库中的键值对来记录数据库的状态，可能丢失最近一次创建快照之后写入的所有数据
 
 手动执行
 
 - SAVE
+
+  在快照创建完毕之前不再响应其他任何命令
+
 - BGSAVE
+
+  使用子进程负责快照写入，父进程继续处理命令请求
 
 自动间隔性保存
 
 - 设置保存条件
 
+  ```ba
+  save 60 1000
+  save 1 100000
+  ```
+
 RDB 文件结构
 
-##### AOF 持久化
+##### AOF 持久化(只追加写入)
 
 通过保存服务器所执行的写命令来记录数据库状态
 
@@ -323,11 +333,50 @@ AOF(append only file) 持久化实现
 appendfsync
 
 - always
+
+  每个 Redis 命令都要同步写入硬盘，效率低
+
 - everysec
+
+  每秒执行一次同步，显示将多个写命令同步到硬盘
+
 - no
+
+  让操作系统决定何时进行同步
 
 AOF 重写
 
-- REWRITE
+解决 AOF 文件体积不断增大的问题
 
+- REWRITE
 - BGREWRITEAOF
+
+自动间隔性重写
+
+```bash
+# 当AOF文件体积大于64MB并且文件的体积比上一次重写之后大至少一倍时执行BGREWRITEAOF
+auto-aof-rewrite-percentage 100
+auto-aof-rewrite-min-size 64mb
+```
+
+
+
+### 四、复制
+
+`slaveof host port` 命令可以让当前服务器成为某一台服务器的从服务器
+
+`info replication` 查看当前服务器状态
+
+哨兵模式：Sentinel 系统用于管理多个 Redis 服务器
+
+- 监控
+- 提醒
+- 自动故障迁移
+
+配置 sentinel.conf 
+
+```bash
+# setinel monitor 被监控数据库名 IP PORT NUMBER
+sentinel monitor server6379 10.211.55.6 6379 1
+```
+
