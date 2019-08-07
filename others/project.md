@@ -250,3 +250,49 @@ spring:
             cluster-nodes: localhost:9300
 ```
 
+##### elasticsearch 与 MySQL 同步
+
+安装 Logstash
+
+> Logstash 是一款轻量级的日志搜集处理框架，可以方便的把分散的、多样化的日志搜集起来，并进行自定义的处理，然后传输到指定的位置，比如某个服务器或者文件
+
+将数据库导入 elasticsearch
+
+
+
+### 消息中间件 RabbitMQ
+
+##### 概述
+
+RabbitMQ 是一个由 Erlang 语言开发的 AMQP(高级消息队列协议) 的开源实现的消息队列中间件，是分布式系统中重要的组件，主要解决应用耦合，异步消息，流量削锋等问题实现高性能，高可用，可伸缩和最终一致性，使用较多的消息队列有 ActiveMQ，RabbitMQ，ZeroMQ，Kafka，MetaMQ，RocketMQ
+
+##### 特点
+
+- 可靠性
+- 灵活的路由
+- 消息集群
+- 高可用
+- 多种协议
+- 多语言客户端
+- 管理界面
+- 跟踪机制
+- 插件机制
+
+##### 术语
+
+- RabbitMQ Server
+- Producer
+- Consumer
+- Exchange
+- Queue
+- RoutingKey
+- Connection
+- Channels
+- VirtualHost
+
+##### 模式
+
+- Direct
+- Fan out
+- Topic
+
