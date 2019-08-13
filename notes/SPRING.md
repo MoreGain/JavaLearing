@@ -102,7 +102,7 @@ BeanFactory 接口实现的容器，每次在获得对象时才会创建对象
 
 从硬盘绝对路径下加载配置文件：FileSystemXmlApplicationContext
 
-所以在 web 开发中，使用 ApplicationContext，开资源匮乏的环境可以使用 BeanFactory
+所以在 web 开发中，使用 ApplicationContext，开发资源匮乏的环境可以使用 BeanFactory
 
 ### 配置文件
 
@@ -282,6 +282,44 @@ properties 类型注入
     </property>
 </bean>
 ```
+
+### Spring Bean 的生命周期
+
+###### 实例化 Bean
+
+也就是我们常说的new
+
+###### 设置对象属性（依赖注入）
+
+按照Spring上下文对实例化的Bean进行配置
+
+###### 处理 Aware 接口
+
+如果 Bean 实现了 BeanNameAware 接口，会调用它实现的 setBeanName(String beanId)
+
+如果 Bean 实现了 BeanFactoryAware 接口，调用它实现的 setBeanFactory(BeanFactory) 方法
+
+如果 Bean 实现了 ApplicationContextAware 接口，会调用 setApplicationContext(ApplicationContext) 方法
+
+###### BeanPostProcessor
+
+如果这个 Bean 关联了 BeanPostProcessor 接口，将会调用 postProcessBeforeInitialization(Object obj, String s) 方法
+
+###### init-method
+
+如果 Bean 在 Spring 配置文件中配置了 init-method 属性，则会自动调用其配置的初始化方法
+
+###### BeanPostProcessor
+
+如果这个 Bean 实现了 BeanPostProcessor 接口，将会调用 postProcessAfterInitialization(Object obj, String s) 方法
+
+###### DisposableBean
+
+当 Bean 不再需要时，会经过清理阶段，如果 Bean 实现了 DisposableBean 这个接口，会调用其实现的 destroy() 方法
+
+###### destroy-method
+
+最后，如果这个 Bean 的 Spring 配置中配置了 destroy-method 属性，会自动调用其配置的销毁方法
 
 ### WEB 环境中使用 spring 容器
 

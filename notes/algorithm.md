@@ -60,25 +60,25 @@ public int[] bubbleSort(int[] arr){
 
 ##### 选择排序
 
-> 时间复杂度为O(N)，空间复杂度为O(1)，不能做到稳定性
+> 时间复杂度为O(N^2)，空间复杂度为O(1)，不能做到稳定性
 
 ```java
-public static void seclectSort(int[] arr) {
+public static void selectSort(int[] arr) {
     if(arr == null || arr.length < 2)
         return;
     selectSort(arr, 0, arr.length - 1);
 }
 
-public static void seclectSort(int[] arr, int L, int R) {
+public static void selectSort(int[] arr, int L, int R) {
     int min = 0;
-    for(int i = L; i < R; L++) {
+    for(int i = L; i < R; i++) {
         min = i;
         for(int j = i + 1; j <= R; j++) {
-            if(arr[i] > arr[j]) {
+            if(arr[min] > arr[j]) {
                 min = j;
             }
         }
-        swap(arr, i , j);
+        swap(arr, i , min);
     }
 }
 ```
