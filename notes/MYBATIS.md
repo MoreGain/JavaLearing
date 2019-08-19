@@ -112,7 +112,7 @@ public class User {
 <!DOCTYPE mapper
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<!-- namespace：命名空间，用于隔离sql，还有一个很重要的作用，后面会讲 -->
+<!-- namespace：命名空间，用于隔离sql -->
 <mapper namespace="user">
     
 </mapper>
@@ -430,7 +430,7 @@ public class Order {
         <!-- 配置主键，是关联Order的唯一标识 -->
         <id property="id" column="oid" />
         <result property="number" column="number" />
-	</collection>
+    </collection>
 </resultMap>
 ```
 
@@ -613,6 +613,12 @@ publc class Course {
 
 先从单表查询、需要时再从关联表去关联查询，提升数据库性能，因为查询单表要比关联查询多张表速度要快，内存资源占用更少
 
+###### 加载时机
+
+- 直接加载：执行完对主加载对象的 select 语句，马上执行对关联对象的 `select`查询
+- 侵入式加载：执行对主加载对象的查询时，不会执行对关联对象的查询。但当要访问主加载对象的详情属性时，就会马上执行关联对象的 `select` 查询
+- 深度延迟：执行对主加载对象的查询时，不会执行对关联对象的查询。访问主加载对象的详情时也不会执行关联对象的`select`查询。只有当真正访问关联对象的详情时，才会执行对关联对象的 `select`查询
+
 ###### 延迟加载 setting 参数配置
 
 ```xml
@@ -622,7 +628,7 @@ publc class Course {
     	<setting name="lazyLoadingEnabled" value="true" />
         <!-- 侵入式加载，任何方法的调用都会加载该对象的所有属性，否则每个对象按需加载 -->
         <setting name="aggressiveLazyLoading" value="false" />
-        <!-- 指定哪个对象的方法触发一次延迟加载 -->
+        <!-- 指定对象的哪些方法触发一次延迟加载 -->
         <setting name="lazyLoadTriggerMethods" value="equals,clone,hashCode,toString"/>
     </settings>
 </configuration>
@@ -638,6 +644,8 @@ publc class Course {
     </resultMap>
 </mapper>
 ```
+
+*参考资料：[【深入MyBatis】懒加载(延迟加载)](https://www.jianshu.com/p/29fcdc4e50c8)*
 
 
 

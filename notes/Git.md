@@ -1,5 +1,21 @@
 # Git
 
+###### Git 对象模型
+
+SHA：索引
+
+对象：类型（blob、tree、commit、tag）、大小、内容
+
+blob：存储文件内容 `git show SHA1`
+
+tree：
+
+commit：
+
+tag：
+
+
+
 设置用户名和邮箱作为标识
 
 ```bash

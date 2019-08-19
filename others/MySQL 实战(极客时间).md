@@ -127,3 +127,47 @@ update 具体执行流程
 redo log 和 binlog 都可以用于表示事务的提交状态，两阶段提交让这两个阶段保持逻辑上的一致
 
 ###### 什么场景下，一天一备比一周一备更有优势？它影响这个数据库系统的哪个指标？
+
+
+
+
+
+### 事务
+
+事务特性
+
+隔离级别--修改隔离级别--适用场景
+
+```sql
+-- 查看当前隔离级别
+show variables like 'transaction_isolation'
+```
+
+并发问题
+
+事务实现：视图
+
+事务隔离实现：回滚日志，多版本并发控制(MVCC)，回滚日志何时删除
+
+长事务：大量回滚日志，占用锁资源
+
+长事务避免方式：`(1)set autocommit = 1` `(2)commit work and chain`
+
+```sql
+-- 查询持续时间超过 60s 的长事务
+select * from information_schema.innodb_trx where TIME_TO_SEC(timediff(now(),trx_started)) > 60
+```
+
+
+
+
+
+### 索引
+
+哈希表：缺--哈希冲突、区间查询慢；优--维护简单、适用于等值查询(Memcached/NoSQL)
+
+有序数组：缺--维护困难；优--区间查询、等值查询、适用于静态存储
+
+二叉树：查询复杂度O(logN)，维护复杂度O(logN)
+
+索引

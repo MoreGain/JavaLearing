@@ -60,25 +60,25 @@ public int[] bubbleSort(int[] arr){
 
 ##### 选择排序
 
-> 时间复杂度为O(N)，空间复杂度为O(1)，不能做到稳定性
+> 时间复杂度为O(N^2)，空间复杂度为O(1)，不能做到稳定性
 
 ```java
-public static void seclectSort(int[] arr) {
+public static void selectSort(int[] arr) {
     if(arr == null || arr.length < 2)
         return;
     selectSort(arr, 0, arr.length - 1);
 }
 
-public static void seclectSort(int[] arr, int L, int R) {
+public static void selectSort(int[] arr, int L, int R) {
     int min = 0;
-    for(int i = L; i < R; L++) {
+    for(int i = L; i < R; i++) {
         min = i;
         for(int j = i + 1; j <= R; j++) {
-            if(arr[i] > arr[j]) {
+            if(arr[min] > arr[j]) {
                 min = j;
             }
         }
-        swap(arr, i , j);
+        swap(arr, i , min);
     }
 }
 ```
@@ -255,3 +255,33 @@ public static void heapify(int[] arr, int index, int size) {
 }
 ```
 
+
+
+### 数据结构
+
+##### 红黑树
+
+###### 平衡二叉树
+
+- 所有左节点都小于等于父节点的值
+- 所有右节点都大于等于父节点的值
+
+###### 红黑树
+
+- 所有节点都是红色或者黑色
+- 根节点只能是黑色
+- 所有叶子都是空的黑色节点
+- 每个红色节点的子节点只能为黑色
+- 任意节点到其叶子的所有路径拥有相同数目的黑色节点
+
+###### 自平衡策略
+
+- 变色
+
+- 左旋转
+
+  逆时针旋转红黑树，使其右节点变为新的父节点，父节点变为左子节点
+
+- 右旋转
+
+  顺时针旋转红黑树，使其左节点变为新的父节点，父节点变为右子节点

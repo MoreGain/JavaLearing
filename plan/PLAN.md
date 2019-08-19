@@ -15,3 +15,13 @@
    仅用递归函数和栈操作逆序一个栈
 
 2. web 基础笔记重整理
+
+
+
+##### 7.15
+
+1. SpringCloud: Eureka/Ribbon/Hystrix/Feign
+2. Java 虚拟机：内存划分、垃圾回收机制
+3. Java基础：初始化与清理
+4. 红黑树
+5. 面向对象思想

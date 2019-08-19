@@ -102,7 +102,7 @@ BeanFactory 接口实现的容器，每次在获得对象时才会创建对象
 
 从硬盘绝对路径下加载配置文件：FileSystemXmlApplicationContext
 
-所以在 web 开发中，使用 ApplicationContext，开资源匮乏的环境可以使用 BeanFactory
+所以在 web 开发中，使用 ApplicationContext，开发资源匮乏的环境可以使用 BeanFactory
 
 ### 配置文件
 
@@ -283,6 +283,44 @@ properties 类型注入
 </bean>
 ```
 
+### Spring Bean 的生命周期
+
+###### 实例化 Bean
+
+也就是我们常说的new
+
+###### 设置对象属性（依赖注入）
+
+按照Spring上下文对实例化的Bean进行配置
+
+###### 处理 Aware 接口
+
+如果 Bean 实现了 BeanNameAware 接口，会调用它实现的 setBeanName(String beanId)
+
+如果 Bean 实现了 BeanFactoryAware 接口，调用它实现的 setBeanFactory(BeanFactory) 方法
+
+如果 Bean 实现了 ApplicationContextAware 接口，会调用 setApplicationContext(ApplicationContext) 方法
+
+###### BeanPostProcessor
+
+如果这个 Bean 关联了 BeanPostProcessor 接口，将会调用 postProcessBeforeInitialization(Object obj, String s) 方法
+
+###### init-method
+
+如果 Bean 在 Spring 配置文件中配置了 init-method 属性，则会自动调用其配置的初始化方法
+
+###### BeanPostProcessor
+
+如果这个 Bean 实现了 BeanPostProcessor 接口，将会调用 postProcessAfterInitialization(Object obj, String s) 方法
+
+###### DisposableBean
+
+当 Bean 不再需要时，会经过清理阶段，如果 Bean 实现了 DisposableBean 这个接口，会调用其实现的 destroy() 方法
+
+###### destroy-method
+
+最后，如果这个 Bean 的 Spring 配置中配置了 destroy-method 属性，会自动调用其配置的销毁方法
+
 ### WEB 环境中使用 spring 容器
 
 1. 导包
@@ -447,19 +485,19 @@ public class MyCglibProxy implements MethodInterceptor {
     //生成代理的方法
     public CustomerDao createProxy(){
         // 创建 Cglib 的核心类
-		Enhancer enhancer = new Enhancer();
-		// 设置父类
-		enhancer.setSuperclass(CustomerDao.class);
-		// 设置回调
-		enhancer.setCallback(this);
-		// 生成代理
+        Enhancer enhancer = new Enhancer();
+        // 设置父类
+        enhancer.setSuperclass(CustomerDao.class);
+        // 设置回调
+        enhancer.setCallback(this);
+        // 生成代理
         CustomerDao customerDaoProxy = (CustomerDao)enhancer.careate();
         return customerDaoProxy;
     }
     
     @Override
-	public Object intercept(Object proxy,Method method,Object[] args,MethodProxy methodProxy) throws Throwable {
-         if("delete".equals(method.getName()) {
+    public Object intercept(Object proxy,Method method,Object[] args,MethodProxy methodProxy) throws Throwable {
+        if("delete".equals(method.getName()) {
             Object obj = methodProxy.invokeSuper(proxy, args);
             System.out.println("日志记录");
             return obj;
@@ -525,7 +563,7 @@ Aspect(切面): 切入点+通知
            ...;
            return proceed;
        }
-       //异常拦截通知	如果出现异常则调用
+       //异常拦截通知    如果出现异常则调用
        public void afterException(){...}
        //后置通知	目标方法运行之后调用（无论是否出现异常都会调用）
        public void after(){...}
@@ -848,7 +886,7 @@ public class AccountDaoImpl extends JdbcDaoSupport implements AccountDao {
    </bean>
    <!-- 在业务层注入事务管理模板 -->
    <bean id="accountServiceImpl" class="com.project.service.AccountServiceImpl">
-   	<property name="accountDao" ref="accountDaImpl"></property>
+       <property name="accountDao" ref="accountDaImpl"></property>
        <!-- 需要注入DateSource或JdbcTemplate -->
        <property name="dataSource" ref="dataSource"></property>
        <!-- 注入事务管理模板 -->
@@ -905,7 +943,7 @@ public class AccountDaoImpl extends JdbcDaoSupport implements AccountDao {
                rollback-for=""	-Exception
                no-rollback-for=""	+Exception
            -->
-   	    <tx:method name="transfer" propagetion="REQUIRED"></tx:method>
+           <tx:method name="transfer" propagetion="REQUIRED"></tx:method>
        </tx:attributes>
    </tx:advice>
    ```
@@ -958,11 +996,125 @@ public class AccountDaoImpl extends JdbcDaoSupport implements AccountDao {
        <!-- 事务管理器 -->
        <property name="transactionManager" ref="transactionManager"></property>
        <property name="transactionAttributes">
-       	<props>
-           	<prop key="transfer">ISOLATION_DEFAULT,PROPAGATION_REQUIRED</prop>
+           <props>
+               <prop key="transfer">ISOLATION_DEFAULT,PROPAGATION_REQUIRED</prop>
            </props>
        </property>
    </bean>
    ```
 
    
+
+### Spring 4.x 开发实战
+
+Spring 有一个数据转换框架，可以使字符串和 Java 数据类型相互转换，如 @LocalDate 注解
+
+```java
+@RestController
+public class LocalDateController {
+    @RequestMapping("/date/{localDate}")
+    public String get(@DateTimeFormat(iso = ISO.DATE) LocalDate localDate) {
+        return localDate.toString();
+    }
+}
+```
+
+spring 4.0 支持使用重复注解，如使用 @PropertySource 加载不同的配置文件，仅支持 @Scheduled 和 @PropertySource 的重复
+
+```java
+@PropertySource("classpath:/conf1.properties")
+@PropertySource("classpath:/conf2.properties")
+```
+
+空指针终结者 Optional<>，使用场景：可选属性注入，可选参数
+
+```java
+//ud不一定注入，以前的方式
+@Autowired(required = false)
+private UserDao ud;
+
+//现在可使用
+@Autowired
+private Optional<UserDao> ud;
+
+//可选参数
+public User getUser(String id, Optional<String> userName) {}
+```
+
+##### Spring Cache
+
+缓存是一种存储机制，它将数据保存在某个地方，并以一种更快的方式提供服务
+
+web 应用中，不同层级对应的技术选型
+
+![](../images/SpringCache1.jpg)
+
+缓存命中率：缓存中读取次数/总读取次数
+
+过期策略：缓存满了后的移除策略
+
+- FIFO
+- LRU
+- LFU
+- TTL
+- TTI
+
+使用 Spring Cache
+
+- 缓存定义：确定需要缓存的方法和缓存策略
+- 缓存配置：配置缓存
+
+###### 缓存注解
+
+public 方法才可以被缓存
+
+@Cacheable
+
+- value/cacheNames
+- key/keyGenerator
+- condition/unless
+
+@CachePut
+
+执行方法将返回值放入缓存，同一个方法类不能同时使用 @Cacheable 和 @CachePut
+
+@CacheEvict
+
+从给定的缓存中移除一个值，新增两个参数
+
+- allEntries--是否清空所有缓存内容，默认 false
+- beforeInvocation--是否在方法执行前就清空，默认 false，方法抛出异常不清空换粗
+
+@Caching
+
+组注解，可以为一个方法定义基于 @Cacheable @CacheEvict @CachePut 的数组
+
+@CacheConfig
+
+类级别的全局缓存注解
+
+###### 缓存管理器
+
+- SimpleCacheManager
+
+- NoOpCacheManager
+
+  主要用于测试，不缓存任何数据
+
+- ConcurrentMapCacheManager
+
+  使用了 JDK 的ConcurrentMap
+
+- CompositeCacheManager
+
+  将多个缓存管理器定义在一起
+
+SpEL 提供了与 root 对象相关联的缓存特定的内置参数
+
+###### 缓存实战
+
+要实现非 public 方法基于注解的缓存必须采用基于 AspectJ 的 AOP 机制
+
+Spring Cache 的原理是基于动态生成子类的代理机制来对方法的调用进行切面的，所以内部调用(this)会导致代理失效，从而导致切面失效，缓存失效
+
+@CacheEvict 的可靠性，方法运行抛出异常会导致清除缓存失败
